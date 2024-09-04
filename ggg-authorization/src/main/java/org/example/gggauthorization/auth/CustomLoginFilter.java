@@ -1,10 +1,12 @@
 package org.example.gggauthorization.auth;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gggauthorization.dto.UserLoginRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -29,10 +31,19 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        UserLoginRequest userLoginRequest;
 
-        // 클라이언트 요청에서 추출
-        String username = obtainUsername(request);
-        String password = obtainPassword(request);
+        try {
+            // RequestBody 에서 UserLoginRequest 를 읽어옴
+            userLoginRequest = objectMapper.readValue(request.getInputStream(), UserLoginRequest.class);
+        } catch (IOException exception) {
+            throw new RuntimeException("로그인 요청 파라미터를 읽을 수 없습니다.", exception);
+        }
+
+        // 클라이언트 요청 RequestBody 에서 추출
+        String username = userLoginRequest.username();
+        String password = userLoginRequest.password();
 
         // username 과 password 를 검증하기 위해 토큰에 담음
         // 아직 인증되지 않은 Authentication 객체를 생성했고, 인증이 완료되면 인증된 생성자로 Authentication 객체를 생성가 생성됨
