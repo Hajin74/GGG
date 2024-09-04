@@ -1,13 +1,10 @@
 package org.example.gggauthorization.auth;
 
-import io.jsonwebtoken.Jwt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,9 +19,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-
-    @Value("${spring.jwt.expiredMs}")
-    private Long expiredMs;
+    private final Long EXPIRED_MS = 60 * 60 * 10L;
 
     public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
@@ -55,7 +50,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         String username = customUserDetails.getUsername();
         Long id = customUserDetails.getId();
 
-        String token = jwtUtil.createJwt(username, id, expiredMs);
+        String token = jwtUtil.createJwt(username, id, EXPIRED_MS);
 
         response.addHeader("Authorization", "Bearer " + token);
     }
