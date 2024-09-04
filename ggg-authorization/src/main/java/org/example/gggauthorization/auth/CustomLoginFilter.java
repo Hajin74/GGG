@@ -20,6 +20,11 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
 
+    public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl) {
+        this.authenticationManager = authenticationManager;
+        setFilterProcessesUrl(customLoginUrl);
+    }
+
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 

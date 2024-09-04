@@ -35,6 +35,9 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
+        // 로그인 필터 객체 생성 및 Url 커스텀
+        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authenticationManager(authenticationConfiguration), "/api/users/login");
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
@@ -50,7 +53,7 @@ public class SecurityConfig {
 
         /* 필터 등록 */
         http
-                .addFilterAt(new CustomLoginFilter(authenticationManager(authenticationConfiguration)), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
