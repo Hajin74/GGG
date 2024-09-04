@@ -2,6 +2,7 @@ package org.example.gggauthorization.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gggauthorization.auth.CustomLoginFilter;
+import org.example.gggauthorization.auth.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +22,7 @@ public class SecurityConfig {
 
     // AuthenticationManager 가 인자로 받을 authenticationConfiguration 객체, 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final JwtUtil jwtUtil;
 
     @Bean // AuthenticationManager 빈 등록
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -36,7 +38,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         // 로그인 필터 객체 생성 및 Url 커스텀
-        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authenticationManager(authenticationConfiguration), "/api/users/login");
+        CustomLoginFilter customLoginFilter = new CustomLoginFilter(authenticationManager(authenticationConfiguration), "/api/users/login", jwtUtil);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)

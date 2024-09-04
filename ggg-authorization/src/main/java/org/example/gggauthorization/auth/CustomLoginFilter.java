@@ -1,11 +1,13 @@
 package org.example.gggauthorization.auth;
 
+import io.jsonwebtoken.Jwt;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -15,13 +17,17 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import java.io.IOException;
 
 @Slf4j
-@RequiredArgsConstructor
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
 
-    public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl) {
+    @Value("${spring.jwt.expiredMs}")
+    private Long expiredMs;
+
+    public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
         setFilterProcessesUrl(customLoginUrl);
     }
 
@@ -44,6 +50,14 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         // todo: 성공 시 로직, jwt 를 발급할 것
+        CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
+
+        String username = customUserDetails.getUsername();
+        Long id = customUserDetails.getId();
+
+        String token = jwtUtil.createJwt(username, id, expiredMs);
+
+        response.addHeader("Authorization", "Bearer " + token);
     }
 
     @Override
