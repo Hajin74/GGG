@@ -2,6 +2,7 @@ package org.example.gggauthorization.config;
 
 import lombok.RequiredArgsConstructor;
 import org.example.gggauthorization.auth.CustomLoginFilter;
+import org.example.gggauthorization.auth.JwtFilter;
 import org.example.gggauthorization.auth.JwtUtil;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -55,7 +56,8 @@ public class SecurityConfig {
 
         /* 필터 등록 */
         http
-                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
