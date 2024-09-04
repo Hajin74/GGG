@@ -23,6 +23,8 @@ public class JwtFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        log.info("[JwtFilter] 요청 URL: " + request.getRequestURI());
+
         // 요청 Header 에서 Authorization 추출
         String authorization = request.getHeader("Authorization");
 
