@@ -3,6 +3,8 @@ package org.example.gggauthorization.service;
 import lombok.RequiredArgsConstructor;
 import org.example.gggauthorization.domain.entity.User;
 import org.example.gggauthorization.dto.UserJoinRequest;
+import org.example.gggauthorization.exception.CustomException;
+import org.example.gggauthorization.exception.ErrorCode;
 import org.example.gggauthorization.repository.UserRepository;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,7 @@ public class UserService {
 
         boolean isExistedUser = userRepository.existsByUsername(username);
         if (isExistedUser) {
-            // todo : 중복 예외 던지기
-            return;
+            throw new CustomException(ErrorCode.USER_ALREADY_EXISTED);
         }
 
         User newUser = User.builder()
