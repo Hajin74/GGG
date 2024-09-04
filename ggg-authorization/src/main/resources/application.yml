@@ -2,5 +2,19 @@ spring:
   application:
     name: ggg-authorization
 
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${GGG_AUTHORIZATION_DB_URL}
+    username: ${GGG_AUTHORIZATION_DB_USERNAME}
+    password: ${GGG_AUTHORIZATION_DB_PASSWORD}
+
 server:
   port: 8888

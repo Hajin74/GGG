@@ -2,5 +2,19 @@ spring:
   application:
     name: ggg-resource
 
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${RESOURCE_DB_URL}
+    username: ${RESOURCE_DB_USERNAME}
+    password: ${RESOURCE_DB_PASSWORD}
+
 server:
   port: 9999
