@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -49,9 +50,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        // todo: 성공 시 로직, jwt 를 발급할 것
+        // 로그인 성공하면, Jwt 발급
         CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
-
         String username = customUserDetails.getUsername();
         Long id = customUserDetails.getId();
 
@@ -62,7 +62,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-        // todo: 실패 시 로직
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
     }
 
 }
