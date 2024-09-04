@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: ggg-authorization
+
+server:
+  port: 8888
