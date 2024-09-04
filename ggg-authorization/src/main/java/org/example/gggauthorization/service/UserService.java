@@ -20,6 +20,7 @@ public class UserService {
 
         boolean isExistedUser = userRepository.existsByUsername(username);
         if (isExistedUser) {
+            // todo : 중복 예외 던지기
             return;
         }
 
