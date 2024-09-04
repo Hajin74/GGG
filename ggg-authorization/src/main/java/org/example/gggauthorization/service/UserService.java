@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gggauthorization.domain.entity.User;
 import org.example.gggauthorization.dto.UserJoinRequest;
 import org.example.gggauthorization.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     public void joinUser(UserJoinRequest request) {
         String username = request.username();
@@ -23,7 +25,7 @@ public class UserService {
 
         User newUser = User.builder()
                 .username(username)
-                .password(password)
+                .password(bCryptPasswordEncoder.encode(password))
                 .build();
         userRepository.save(newUser);
     }
