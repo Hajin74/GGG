@@ -25,7 +25,7 @@ public class Order {
     private OrderType orderType;
 
     @OneToOne
-    @Column(nullable = false)
+    @JoinColumn(name = "invoice_id", nullable = false)
     private Invoice invoice;
 
     @ManyToOne(fetch = FetchType.LAZY)
