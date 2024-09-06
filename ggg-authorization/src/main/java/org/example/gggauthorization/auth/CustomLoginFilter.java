@@ -7,7 +7,9 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.example.gggauthorization.domain.entity.RefreshToken;
 import org.example.gggauthorization.dto.UserLoginRequest;
+import org.example.gggauthorization.repository.RefreshTokenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -16,17 +18,20 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
+import java.util.Date;
 
 @Slf4j
 public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
+    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
     private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
     private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
 
 
-    public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
+    public CustomLoginFilter(RefreshTokenRepository refreshTokenRepository, AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
+        this.refreshTokenRepository = refreshTokenRepository;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         setFilterProcessesUrl(customLoginUrl);
@@ -61,6 +66,7 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
         /* 로그인 성공하면, Jwt 발급 */
 
+        // 사용자 정보
         CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
         String username = customUserDetails.getUsername();
         Long id = customUserDetails.getId();
@@ -68,6 +74,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         // Access token, Refresh token 생성
         String accessToken = jwtUtil.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
         String refreshToken = jwtUtil.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
+
+        // RefreshToken 서버에 저장
+        addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRED_MS);
 
         // 응답 설정
         response.addHeader("AccessToken", accessToken);
@@ -85,6 +94,17 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         cookie.setMaxAge(24*60*60);
         cookie.setHttpOnly(true);
         return cookie;
+    }
+
+    private void addRefreshToken(String username, String token, Long expiredMs) {
+        Date date = new Date(System.currentTimeMillis() + expiredMs);
+
+        RefreshToken refreshToken = RefreshToken.builder()
+                .username(username)
+                .token(token)
+                .expiration(date.toString())
+                .build();
+        refreshTokenRepository.save(refreshToken);
     }
 
 }
