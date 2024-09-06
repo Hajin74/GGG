@@ -3,6 +3,7 @@ package org.example.gggauthorization.auth;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,9 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
-    private final Long EXPIRED_MS = 60 * 60 * 10L;
+    private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
+    private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
+
 
     public CustomLoginFilter(AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
         this.authenticationManager = authenticationManager;
@@ -56,19 +59,32 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        // 로그인 성공하면, Jwt 발급
+        /* 로그인 성공하면, Jwt 발급 */
+
         CustomUserDetails customUserDetails = (CustomUserDetails) authResult.getPrincipal();
         String username = customUserDetails.getUsername();
         Long id = customUserDetails.getId();
 
-        String token = jwtUtil.createJwt(username, id, EXPIRED_MS);
+        // Access token, Refresh token 생성
+        String accessToken = jwtUtil.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
+        String refreshToken = jwtUtil.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
 
-        response.addHeader("Authorization", "Bearer " + token);
+        // 응답 설정
+        response.addHeader("AccessToken", accessToken);
+        response.addCookie(createCookie("RefreshToken", refreshToken));
+        response.setStatus(HttpStatus.OK.value());
     }
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    private Cookie createCookie(String key, String value) {
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(24*60*60);
+        cookie.setHttpOnly(true);
+        return cookie;
     }
 
 }

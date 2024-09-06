@@ -1,5 +1,6 @@
 package org.example.gggauthorization.auth;
 
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,12 +10,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.example.gggauthorization.domain.entity.User;
 import org.example.gggauthorization.exception.CustomException;
 import org.example.gggauthorization.exception.ErrorCode;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -25,26 +28,38 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("[JwtFilter] 요청 URL: " + request.getRequestURI());
 
-        // 요청 Header 에서 Authorization 추출
-        String authorization = request.getHeader("Authorization");
+        // 요청 Header 에서 AccessToken 추출
+        String accessToken = request.getHeader("AccessToken");
 
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
+        if (accessToken == null) {
             filterChain.doFilter(request, response);
-            throw new CustomException(ErrorCode.TOKEN_NOT_EXISTED);
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_NOT_EXISTED);
         }
 
-        // Token 추출
-        String token = authorization.split(" ")[1];
 
-        if (jwtUtil.isExpired(token)) {
-            filterChain.doFilter(request, response);
-            throw new CustomException(ErrorCode.TOKEN_IS_EXPIRED);
+        // 토큰 만료 여부 확인
+        try {
+            jwtUtil.isExpired(accessToken);
+        } catch (ExpiredJwtException exception) {
+            PrintWriter writer = response.getWriter();
+            writer.print("만료된 AccessToken 입니다.");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
+        }
+
+        // 토큰 타입 확인
+        String tokenType = jwtUtil.getTokenType(accessToken);
+        if (!tokenType.equals("AccessToken")) {
+            PrintWriter writer = response.getWriter();
+            writer.print("유효하지 않은 토큰입니다.");
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            return;
         }
 
         // 토큰에서 사용자 정보 획득 및 사용자 생성
         User user = User.builder()
-                .id(jwtUtil.getId(token))
-                .username(jwtUtil.getUsername(token))
+                .id(jwtUtil.getId(accessToken))
+                .username(jwtUtil.getUsername(accessToken))
                 .password("tempPassword")
                 .build();
 
@@ -57,6 +72,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // 세션에 사용자 등록하여 현재 사용자가 인증되었다고 판단
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
+        // 다음 필터로 진행
         filterChain.doFilter(request, response);
     }
 }

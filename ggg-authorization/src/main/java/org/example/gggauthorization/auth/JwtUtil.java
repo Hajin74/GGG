@@ -19,6 +19,15 @@ public class JwtUtil {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
 
+    public String getTokenType(String token) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("tokenType", String.class);
+    }
+
     public String getUsername(String token) {
         return Jwts.parser()
                 .verifyWith(secretKey)
@@ -48,8 +57,9 @@ public class JwtUtil {
     }
 
     // 사용자 정보를 담아서 Jwt 발급
-    public String createJwt(String username, Long id, Long expiredMs) {
+    public String createJwt(String tokenType, String username, Long id, Long expiredMs) {
         return Jwts.builder()
+                .claim("tokenType", tokenType)
                 .claim("username", username)
                 .claim("id", id)
                 .issuedAt(new Date(System.currentTimeMillis()))
