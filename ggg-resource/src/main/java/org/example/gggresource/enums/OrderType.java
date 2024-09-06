@@ -1,14 +1,12 @@
 package org.example.gggresource.enums;
 
 import lombok.AllArgsConstructor;
-import lombok.Getter;
 
 @AllArgsConstructor
-@Getter
-public enum PurityType {
+public enum OrderType {
 
-    GOLD_999("99.9"),
-    GOLD_9999("99.99");
+    SELL("판매"),
+    PURCHASE("매입");
 
     private final String korean;
 
