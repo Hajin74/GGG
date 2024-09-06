@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-//@RequestMapping("/api/users")
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserService userService;
@@ -16,11 +16,6 @@ public class UserController {
     @PostMapping("/api/users/join")
     public void joinUser(@RequestBody @Valid UserJoinRequest request) {
         userService.joinUser(request);
-    }
-
-    @GetMapping("/api/test")
-    public String test() {
-        return "ok";
     }
 
 }

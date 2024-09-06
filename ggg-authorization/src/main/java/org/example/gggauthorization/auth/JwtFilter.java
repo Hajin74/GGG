@@ -33,7 +33,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if (accessToken == null) {
             filterChain.doFilter(request, response);
-            throw new CustomException(ErrorCode.TOKEN_NOT_EXISTED);
+            throw new CustomException(ErrorCode.ACCESS_TOKEN_NOT_EXISTED);
         }
 
 
