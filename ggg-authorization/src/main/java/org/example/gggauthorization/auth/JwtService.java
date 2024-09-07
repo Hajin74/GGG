@@ -11,13 +11,14 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
-public class JwtUtil {
+public class JwtService {
 
     private SecretKey secretKey;
 
-    public JwtUtil(@Value("${spring.jwt.secret}") String secret) {
+    public JwtService(@Value("${spring.jwt.secret}") String secret) {
         secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
     }
+
 
     public String getTokenType(String token) {
         return Jwts.parser()

@@ -25,15 +25,15 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
 
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationManager authenticationManager;
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
     private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
     private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
 
 
-    public CustomLoginFilter(RefreshTokenRepository refreshTokenRepository, AuthenticationManager authenticationManager, String customLoginUrl, JwtUtil jwtUtil) {
+    public CustomLoginFilter(RefreshTokenRepository refreshTokenRepository, AuthenticationManager authenticationManager, String customLoginUrl, JwtService jwtService) {
         this.refreshTokenRepository = refreshTokenRepository;
         this.authenticationManager = authenticationManager;
-        this.jwtUtil = jwtUtil;
+        this.jwtService = jwtService;
         setFilterProcessesUrl(customLoginUrl);
     }
 
@@ -72,8 +72,8 @@ public class CustomLoginFilter extends UsernamePasswordAuthenticationFilter {
         Long id = customUserDetails.getId();
 
         // Access token, Refresh token 생성
-        String accessToken = jwtUtil.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
-        String refreshToken = jwtUtil.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
+        String accessToken = jwtService.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
+        String refreshToken = jwtService.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
 
         // RefreshToken 서버에 저장
         addRefreshToken(username, refreshToken, REFRESH_TOKEN_EXPIRED_MS);

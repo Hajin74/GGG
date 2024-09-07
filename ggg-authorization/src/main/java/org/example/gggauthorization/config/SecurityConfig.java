@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gggauthorization.auth.CustomLoginFilter;
 import org.example.gggauthorization.auth.CustomLogoutFilter;
 import org.example.gggauthorization.auth.JwtFilter;
-import org.example.gggauthorization.auth.JwtUtil;
+import org.example.gggauthorization.auth.JwtService;
 import org.example.gggauthorization.repository.RefreshTokenRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +27,7 @@ public class SecurityConfig {
     // AuthenticationManager 가 인자로 받을 authenticationConfiguration 객체, 생성자 주입
     private final AuthenticationConfiguration authenticationConfiguration;
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
 
     private final RefreshTokenRepository refreshTokenRepository;
 
@@ -45,10 +45,10 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         // 로그인 필터 객체 생성 및 Url 커스텀
-        CustomLoginFilter customLoginFilter = new CustomLoginFilter(refreshTokenRepository, authenticationManager(authenticationConfiguration), "/api/users/login", jwtUtil);
+        CustomLoginFilter customLoginFilter = new CustomLoginFilter(refreshTokenRepository, authenticationManager(authenticationConfiguration), "/api/users/login", jwtService);
 
         // 로그아웃 필터 객체 생성
-        CustomLogoutFilter customLogoutFilter = new CustomLogoutFilter(jwtUtil, refreshTokenRepository);
+        CustomLogoutFilter customLogoutFilter = new CustomLogoutFilter(jwtService, refreshTokenRepository);
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
@@ -67,7 +67,7 @@ public class SecurityConfig {
         /* 필터 등록 */
         http
                 .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
-                .addFilterAfter(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(customLogoutFilter, LogoutFilter.class);
 
         return http.build();

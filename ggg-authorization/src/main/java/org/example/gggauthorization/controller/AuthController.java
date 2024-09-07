@@ -6,7 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gggauthorization.auth.JwtUtil;
+import org.example.gggauthorization.auth.JwtService;
 import org.example.gggauthorization.domain.entity.RefreshToken;
 import org.example.gggauthorization.exception.CustomException;
 import org.example.gggauthorization.exception.ErrorCode;
@@ -26,7 +26,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 public class AuthController {
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
     private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
@@ -54,13 +54,13 @@ public class AuthController {
 
         // 만료 여부 확인
         try {
-            jwtUtil.isExpired(refreshToken);
+            jwtService.isExpired(refreshToken);
         } catch (ExpiredJwtException exception) {
             throw new CustomException(ErrorCode.TOKEN_IS_EXPIRED);
         }
 
         // 토큰 타입 확인
-        String tokenType = jwtUtil.getTokenType(refreshToken);
+        String tokenType = jwtService.getTokenType(refreshToken);
         if (!tokenType.equals("RefreshToken")) {
             throw new CustomException(ErrorCode.INVALID_TOKEN_TYPE);
         }
@@ -72,12 +72,12 @@ public class AuthController {
         }
 
         // 인증 정보 추출
-        String username = jwtUtil.getUsername(refreshToken);
-        Long id = jwtUtil.getId(refreshToken);
+        String username = jwtService.getUsername(refreshToken);
+        Long id = jwtService.getId(refreshToken);
 
         // AccessToken, RefreshToken 재발급
-        String newAccessToken = jwtUtil.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
-        String newRefreshToken = jwtUtil.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
+        String newAccessToken = jwtService.createJwt("AccessToken", username, id, ACCESS_TOKEN_EXPIRED_MS);
+        String newRefreshToken = jwtService.createJwt("RefreshToken", username, id, REFRESH_TOKEN_EXPIRED_MS);
 
         // 기존 RefreshToken 은 삭제하고, newRefreshToken 은 서버에 저장
         refreshTokenRepository.deleteByToken(refreshToken);
