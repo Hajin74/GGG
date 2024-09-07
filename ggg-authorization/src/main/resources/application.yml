@@ -18,3 +18,9 @@ spring:
 
 server:
   port: 8888
+
+grpc:
+  server:
+    port: 50052
+    security:
+      enabled: false
