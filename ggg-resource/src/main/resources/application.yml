@@ -18,3 +18,9 @@ spring:
 
 server:
   port: 9999
+
+grpc:
+  client:
+    auth:
+      address: localhost:50052
+      negotiation-type: plaintext
