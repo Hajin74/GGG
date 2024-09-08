@@ -8,7 +8,7 @@ import lombok.Getter;
 public enum ProductType {
 
     SELL("판매"),
-    BUY("매입");
+    PURCHASE("매입");
 
     private final String korean;
 

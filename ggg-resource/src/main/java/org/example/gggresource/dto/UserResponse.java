@@ -1,6 +1,6 @@
 package org.example.gggresource.dto;
 
-public record AuthResponse(
+public record UserResponse(
         boolean success,
         long id,
         String username) {
