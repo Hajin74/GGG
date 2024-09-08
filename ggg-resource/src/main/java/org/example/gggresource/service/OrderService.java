@@ -78,12 +78,32 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // 주문 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
             throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         // 입금 완료
         order.completeDeposit();
+
+        return new OrderStatusUpdateResponse(
+                order.getOrderNumber(),
+                order.getOrderStatus()
+        );
+    }
+
+    @Transactional
+    public OrderStatusUpdateResponse completeDelivery(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 입금 완료 상태인지 확인
+        if (!order.getOrderStatus().equals(OrderStatus.PAID)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // 발송 완료
+        order.completeDelivery();
 
         return new OrderStatusUpdateResponse(
                 order.getOrderNumber(),
