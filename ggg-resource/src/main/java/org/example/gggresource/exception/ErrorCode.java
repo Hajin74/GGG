@@ -1,4 +1,4 @@
-package org.example.gggauthorization.exception;
+package org.example.gggresource.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,12 +8,11 @@ import org.springframework.http.HttpStatus;
 @AllArgsConstructor
 public enum ErrorCode {
 
-    USER_ALREADY_EXISTED(HttpStatus.CONFLICT, "이미 존재하는 사용자입니다."),
-    ACCESS_TOKEN_NOT_EXISTED(HttpStatus.BAD_REQUEST, "Access Token 이 존재하지 않습니다."),
-    REFRESH_TOKEN_NOT_EXISTED(HttpStatus.BAD_REQUEST, "Refresh Token 이 존재하지 않습니다."),
-    INVALID_TOKEN_TYPE(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰 타입입니다."),
-    INVALID_TOKEN(HttpStatus.BAD_REQUEST, "유효하지 않은 토큰입니다."),
-    TOKEN_IS_EXPIRED(HttpStatus.BAD_REQUEST, "토큰이 만료되었습니다.");
+    PRODUCT_NOT_FOUND(HttpStatus.NOT_FOUND, "상품을 찾을 수 없습니다."),
+    ORDER_NOT_FOUND(HttpStatus.NOT_FOUND, "주문을 찾을 수 없습니다."),
+    PRODUCT_ONLY_FOR_SELL(HttpStatus.NOT_FOUND, "해당 상품은 판매용입니다."),
+    PRODUCT_ONLY_FOR_PURCHASE(HttpStatus.NOT_FOUND, "해당 상품은 매입용입니다."),
+    INVALID_ORDER_STATUS(HttpStatus.NOT_FOUND, "주문 상태가 유효하지 않습니다.");
 
     private final HttpStatus httpStatus;
     private final String errorMessage;

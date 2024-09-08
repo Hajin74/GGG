@@ -1,8 +1,7 @@
-package org.example.gggauthorization.exception;
+package org.example.gggresource.exception;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.http.HttpStatus;
 
 @Getter
 @Setter
