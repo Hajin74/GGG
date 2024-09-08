@@ -208,6 +208,20 @@ public class OrderService {
         order.cancelOrder();
     }
 
+    @Transactional
+    public void cancelOrderSell(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 수령 완료 상태가 아닌지 확인
+        if (order.getOrderStatus().equals(OrderStatus.RECEIVED)) {
+            throw new CustomException(ErrorCode.ORDER_ALREADY_RECEIVED);
+        }
+
+        // 주문 취소
+        order.cancelOrder();
+    }
+
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
         BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
         return unitPrice.multiply(quantityAsBigDecimal);

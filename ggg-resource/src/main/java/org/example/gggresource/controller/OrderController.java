@@ -100,11 +100,25 @@ public class OrderController {
      * 소비자 입장에서 구매 입니다.
      * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
      */
-    @DeleteMapping("/{orderNumber}")
+    @DeleteMapping("/buy/{orderNumber}")
     public String cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         validateUser(accessToken);
 
         orderService.cancelOrderBuy(orderNumber);
+
+        return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+    }
+
+    /*
+     * 판매 주문 취소 - Delete
+     * 소비자 입장에서 판매 입니다.
+     * 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.
+     */
+    @DeleteMapping("/sell/{orderNumber}")
+    public String cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        orderService.cancelOrderSell(orderNumber);
 
         return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
     }
