@@ -66,8 +66,8 @@ public class SecurityConfig {
 
         /* 필터 등록 */
         http
-                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new JwtFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(customLoginFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(customLogoutFilter, LogoutFilter.class);
 
         return http.build();

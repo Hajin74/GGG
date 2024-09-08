@@ -28,6 +28,12 @@ public class JwtFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("[JwtFilter] 요청 URL: " + request.getRequestURI());
 
+        // 특정 경로에 대해 필터 적용을 제외
+        if (request.getRequestURI().startsWith("/api/users/join") || request.getRequestURI().startsWith("/api/users/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         // 요청 Header 에서 AccessToken 추출
         String accessToken = request.getHeader("AccessToken");
 
