@@ -3,6 +3,7 @@ package org.example.gggresource.domain.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.example.gggresource.enums.ProductType;
 import org.example.gggresource.enums.PurityType;
 
 import java.math.BigDecimal;
@@ -28,5 +29,9 @@ public class Product {
 
     @Column(nullable = false, length = 512)
     private String content;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ProductType productType;
 
 }
