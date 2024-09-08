@@ -10,6 +10,8 @@ import org.example.gggresource.dto.UserResponse;
 import org.example.gggresource.enums.OrderStatus;
 import org.example.gggresource.enums.OrderType;
 import org.example.gggresource.enums.ProductType;
+import org.example.gggresource.exception.CustomException;
+import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.repository.OrderRepository;
 import org.example.gggresource.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -29,13 +31,12 @@ public class OrderService {
     @Transactional
     public OrderCreateResponse createOrderBuy(UserResponse user, OrderCreateRequest request) {
         // 상품 가져오기
-        // todo: 커스텀 예외 처리
         Product product = productRepository.findById(request.productId())
-                .orElseThrow(() -> new RuntimeException("not found product"));
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
 
         // 판매용 상품만 구매 주문할 수 있게 예외 처리
         if (!product.getProductType().equals(ProductType.SELL)) {
-            throw new RuntimeException("this product is not allowed to sell.");
+            throw new CustomException(ErrorCode.PRODUCT_ONLY_FOR_PURCHASE);
         }
 
         // 사용자 정보 가져오기
@@ -74,13 +75,11 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
-        // todo: 예외 커스텀하기
         Order order = orderRepository.findByOrderNumber(orderNumber)
-                .orElseThrow(() -> new RuntimeException("not found order"));
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
-        // todo: 예외 커스텀하기
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
-            throw new RuntimeException("not ordered status");
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         // 입금 완료
