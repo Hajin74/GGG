@@ -15,6 +15,6 @@ message AuthRequest {
 
 message AuthResponse {
   bool success = 1;
-  string username = 2;
-  string password = 3;
+  int64 id = 2;
+  string username = 3;
 }
