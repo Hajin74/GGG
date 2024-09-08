@@ -5,8 +5,8 @@ import lombok.AllArgsConstructor;
 @AllArgsConstructor
 public enum OrderType {
 
-    SELL("판매"),
-    PURCHASE("매입");
+    BUY("구매"),
+    SELL("판매");
 
     private final String korean;
 
