@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.gggresource.domain.entity.Order;
 import org.example.gggresource.domain.entity.Product;
 import org.example.gggresource.dto.OrderCreateRequest;
+import org.example.gggresource.dto.OrderCreateResponse;
 import org.example.gggresource.dto.UserResponse;
 import org.example.gggresource.enums.OrderStatus;
 import org.example.gggresource.enums.OrderType;
@@ -24,7 +25,7 @@ public class OrderService {
     private final ProductRepository productRepository;
 
     @Transactional
-    public void createOrderBuy(UserResponse user, OrderCreateRequest request) {
+    public OrderCreateResponse createOrderBuy(UserResponse user, OrderCreateRequest request) {
         // 상품 가져오기
         // todo: 커스텀 예외 처리
         Product product = productRepository.findById(request.productId())
@@ -54,6 +55,14 @@ public class OrderService {
                 .orderType(request.orderType())
                 .build();
         orderRepository.save(newOrder);
+
+        return new OrderCreateResponse(
+                newOrder.getOrderNumber(),
+                newOrder.getOrderPrice(),
+                newOrder.getQuantity(),
+                newOrder.getTotalPrice(),
+                deliverInfo
+        );
     }
 
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
