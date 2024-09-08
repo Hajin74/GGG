@@ -7,8 +7,8 @@ import lombok.Getter;
 @Getter
 public enum ProductType {
 
-    SELL("판매"),
-    PURCHASE("매입");
+    SELL("판매용"),
+    PURCHASE("매입용");
 
     private final String korean;
 

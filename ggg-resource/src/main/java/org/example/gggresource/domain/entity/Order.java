@@ -68,4 +68,8 @@ public class Order {
         this.orderType = orderType;
     }
 
+    public void completeDeposit() {
+        this.orderStatus = OrderStatus.PAID;
+    }
+
 }

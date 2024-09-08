@@ -5,9 +5,11 @@ import org.example.gggresource.domain.entity.Order;
 import org.example.gggresource.domain.entity.Product;
 import org.example.gggresource.dto.OrderCreateRequest;
 import org.example.gggresource.dto.OrderCreateResponse;
+import org.example.gggresource.dto.OrderStatusUpdateResponse;
 import org.example.gggresource.dto.UserResponse;
 import org.example.gggresource.enums.OrderStatus;
 import org.example.gggresource.enums.OrderType;
+import org.example.gggresource.enums.ProductType;
 import org.example.gggresource.repository.OrderRepository;
 import org.example.gggresource.repository.ProductRepository;
 import org.springframework.stereotype.Service;
@@ -31,6 +33,11 @@ public class OrderService {
         Product product = productRepository.findById(request.productId())
                 .orElseThrow(() -> new RuntimeException("not found product"));
 
+        // 판매용 상품만 구매 주문할 수 있게 예외 처리
+        if (!product.getProductType().equals(ProductType.SELL)) {
+            throw new RuntimeException("this product is not allowed to sell.");
+        }
+
         // 사용자 정보 가져오기
         // todo: user 에 배달정보 컬럼 추가
         String deliverInfo = "서울시 마포구";
@@ -39,7 +46,7 @@ public class OrderService {
         LocalDateTime orderDate = LocalDateTime.now();
 
         // 주문 번호
-        String orderNumber = generateHumanReadableOrderNumber(orderDate, request.orderType(), request.productId(), request.customerId());
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.BUY, request.productId(), request.customerId());
 
         // 주문 생성
         Order newOrder = Order.builder()
@@ -52,7 +59,7 @@ public class OrderService {
                 .orderDate(orderDate)
                 .deliverInfo(deliverInfo)
                 .orderStatus(OrderStatus.ORDERED)
-                .orderType(request.orderType())
+                .orderType(OrderType.BUY)
                 .build();
         orderRepository.save(newOrder);
 
@@ -62,6 +69,26 @@ public class OrderService {
                 newOrder.getQuantity(),
                 newOrder.getTotalPrice(),
                 deliverInfo
+        );
+    }
+
+    @Transactional
+    public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
+        // todo: 예외 커스텀하기
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new RuntimeException("not found order"));
+
+        // todo: 예외 커스텀하기
+        if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
+            throw new RuntimeException("not ordered status");
+        }
+
+        // 입금 완료
+        order.completeDeposit();
+
+        return new OrderStatusUpdateResponse(
+                order.getOrderNumber(),
+                order.getOrderStatus()
         );
     }
 
