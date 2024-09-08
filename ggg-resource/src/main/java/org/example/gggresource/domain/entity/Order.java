@@ -54,8 +54,11 @@ public class Order {
     @Column(nullable = false)
     private OrderType orderType;
 
+    @Column(nullable = false)
+    private boolean isDeleted;
+
     @Builder
-    public Order(String orderNumber, Product orderProduct, Long customerId, BigDecimal orderPrice, int quantity, BigDecimal totalPrice, LocalDateTime orderDate, String deliverInfo, OrderStatus orderStatus, OrderType orderType) {
+    public Order(String orderNumber, Product orderProduct, Long customerId, BigDecimal orderPrice, int quantity, BigDecimal totalPrice, LocalDateTime orderDate, String deliverInfo, OrderStatus orderStatus, OrderType orderType, boolean isDeleted) {
         this.orderNumber = orderNumber;
         this.orderProduct = orderProduct;
         this.customerId = customerId;
@@ -66,6 +69,7 @@ public class Order {
         this.deliverInfo = deliverInfo;
         this.orderStatus = orderStatus;
         this.orderType = orderType;
+        this.isDeleted = false;
     }
 
     public void completeDeposit() {
@@ -74,6 +78,10 @@ public class Order {
 
     public void completeDelivery() {
         this.orderStatus = OrderStatus.DELIVERED;
+    }
+
+    public void cancelOrder() {
+        this.isDeleted = true;
     }
 
 }

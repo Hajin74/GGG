@@ -59,6 +59,20 @@ public class OrderController {
         return orderService.completeDelivery(orderNumber);
     }
 
+    /*
+     * 구매 주문 취소 - Delete
+     * 소비자 입장에서 구매 입니다.
+     * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
+     */
+    @DeleteMapping("/{orderNumber}")
+    public String cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        orderService.cancelOrderBuy(orderNumber);
+
+        return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+    }
+
     private UserResponse validateUser(String accessToken) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
         if (!user.success()) {
@@ -66,6 +80,5 @@ public class OrderController {
         }
         return user;
     }
-
 
 }
