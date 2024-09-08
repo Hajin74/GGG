@@ -72,4 +72,8 @@ public class Order {
         this.orderStatus = OrderStatus.PAID;
     }
 
+    public void completeDelivery() {
+        this.orderStatus = OrderStatus.DELIVERED;
+    }
+
 }

@@ -42,4 +42,11 @@ public class OrderController {
         return orderService.completeDeposit(orderNumber);
     }
 
+    @PatchMapping("/{orderNumber}/completeDelivery")
+    public OrderStatusUpdateResponse completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        UserResponse user = authServiceClient.authenticateUser(accessToken);
+
+        return orderService.completeDelivery(orderNumber);
+    }
+
 }
