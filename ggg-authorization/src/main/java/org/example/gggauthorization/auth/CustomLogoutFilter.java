@@ -15,7 +15,7 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
     private final RefreshTokenRepository refreshTokenRepository;
 
     @Override
@@ -50,13 +50,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         try {
-            jwtUtil.isExpired(refreshToken);
+            jwtService.isExpired(refreshToken);
         } catch (ExpiredJwtException exception) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             return;
         }
 
-        String tokenType = jwtUtil.getTokenType(refreshToken);
+        String tokenType = jwtService.getTokenType(refreshToken);
         if (!tokenType.equals("RefreshToken")) {
             response.setStatus(HttpStatus.BAD_REQUEST.value());
             return;

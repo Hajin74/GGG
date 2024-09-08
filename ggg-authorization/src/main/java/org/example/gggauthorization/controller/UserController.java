@@ -13,7 +13,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping("/api/users/join")
+    @PostMapping("/join")
     public void joinUser(@RequestBody @Valid UserJoinRequest request) {
         userService.joinUser(request);
     }

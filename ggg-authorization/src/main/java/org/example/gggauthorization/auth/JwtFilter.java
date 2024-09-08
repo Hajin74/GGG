@@ -23,10 +23,16 @@ import java.io.PrintWriter;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-    private final JwtUtil jwtUtil;
+    private final JwtService jwtService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         log.info("[JwtFilter] 요청 URL: " + request.getRequestURI());
+
+        // 특정 경로에 대해 필터 적용을 제외
+        if (request.getRequestURI().startsWith("/api/users/join") || request.getRequestURI().startsWith("/api/users/login")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         // 요청 Header 에서 AccessToken 추출
         String accessToken = request.getHeader("AccessToken");
@@ -39,7 +45,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰 만료 여부 확인
         try {
-            jwtUtil.isExpired(accessToken);
+            jwtService.isExpired(accessToken);
         } catch (ExpiredJwtException exception) {
             PrintWriter writer = response.getWriter();
             writer.print("만료된 AccessToken 입니다.");
@@ -48,7 +54,7 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         // 토큰 타입 확인
-        String tokenType = jwtUtil.getTokenType(accessToken);
+        String tokenType = jwtService.getTokenType(accessToken);
         if (!tokenType.equals("AccessToken")) {
             PrintWriter writer = response.getWriter();
             writer.print("유효하지 않은 토큰입니다.");
@@ -58,8 +64,8 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // 토큰에서 사용자 정보 획득 및 사용자 생성
         User user = User.builder()
-                .id(jwtUtil.getId(accessToken))
-                .username(jwtUtil.getUsername(accessToken))
+                .id(jwtService.getId(accessToken))
+                .username(jwtService.getUsername(accessToken))
                 .password("tempPassword")
                 .build();
 

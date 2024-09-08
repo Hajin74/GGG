@@ -16,7 +16,7 @@ public class AuthController {
 
     private final AuthServiceClient authServiceClient;
 
-    @GetMapping
+    @GetMapping("/verify")
     public String authenticateUser(@RequestParam String accessToken) {
         return authServiceClient.authenticateUser(accessToken);
     }
