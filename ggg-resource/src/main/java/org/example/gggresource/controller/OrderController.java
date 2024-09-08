@@ -7,6 +7,8 @@ import org.example.gggresource.dto.OrderCreateRequest;
 import org.example.gggresource.dto.OrderCreateResponse;
 import org.example.gggresource.dto.OrderStatusUpdateResponse;
 import org.example.gggresource.dto.UserResponse;
+import org.example.gggresource.exception.CustomException;
+import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
 import org.springframework.validation.annotation.Validated;
@@ -31,6 +33,10 @@ public class OrderController {
         // 인증 서버에 토큰을 보내어 사용자 검증을 하고 사용자 정보를 응답값으로 받음
         UserResponse user = authServiceClient.authenticateUser(accessToken);
 
+        if (!user.success()) {
+            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
+        }
+
         return orderService.createOrderBuy(user, orderCreateRequest);
     }
 
@@ -39,12 +45,20 @@ public class OrderController {
     public OrderStatusUpdateResponse completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
 
+        if (!user.success()) {
+            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
+        }
+
         return orderService.completeDeposit(orderNumber);
     }
 
     @PatchMapping("/{orderNumber}/completeDelivery")
     public OrderStatusUpdateResponse completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
+
+        if (!user.success()) {
+            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
+        }
 
         return orderService.completeDelivery(orderNumber);
     }
