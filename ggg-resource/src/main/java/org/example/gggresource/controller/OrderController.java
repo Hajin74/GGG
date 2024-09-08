@@ -20,7 +20,7 @@ public class OrderController {
     private final AuthServiceClient authServiceClient;
 
     /* 구매 주문 생성 - Create
-     * todo: 주문 정보와 구매 타입에 맞는 인보이스가 생성됩니다.
+     * todo: 주문 정보와 구매 타입에 맞는 주문이 생성됩니다.
      */
     @PostMapping("/buy")
     public void createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
