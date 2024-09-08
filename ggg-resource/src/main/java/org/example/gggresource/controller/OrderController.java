@@ -36,6 +36,30 @@ public class OrderController {
     }
 
     /*
+     * 판매 주문 생성 - Create
+     * 소비자 입장에서 판매 입니다.
+     * 매입용 상품만 구매 가능합니다.
+     */
+    @PostMapping("/sell")
+    public OrderCreateResponse createOrderSell(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
+        UserResponse user = validateUser(accessToken);
+
+        return orderService.createOrderSell(user, orderCreateRequest);
+    }
+
+    /*
+     * 판매 주문 송금 완료 처리 - Update
+     * 소비자 입장에서 판매 입니다.
+     * 주문 완료된 상태만 송금 완료 처리할 수 있습니다.
+     */
+    @PatchMapping("/{orderNumber}/completeTransfer")
+    public OrderStatusUpdateResponse completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        return orderService.completeTransfer(orderNumber);
+    }
+
+    /*
      * 구매 주문 입금 완료 처리 - Update
      * 소비자 입장에서 구매 입니다.
      * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.
@@ -60,15 +84,41 @@ public class OrderController {
     }
 
     /*
+     * 판매 주문 수령 완료 처리 - Update
+     * 소비자 입장에서 판매 입니다.
+     * 송금 완료된 상태만 수령 완료 처리할 수 있습니다.
+     */
+    @PatchMapping("/{orderNumber}/completeReceipt")
+    public OrderStatusUpdateResponse completeReceipt(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        return orderService.completeReceipt(orderNumber);
+    }
+
+    /*
      * 구매 주문 취소 - Delete
      * 소비자 입장에서 구매 입니다.
      * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
      */
-    @DeleteMapping("/{orderNumber}")
+    @DeleteMapping("/buy/{orderNumber}")
     public String cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         validateUser(accessToken);
 
         orderService.cancelOrderBuy(orderNumber);
+
+        return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+    }
+
+    /*
+     * 판매 주문 취소 - Delete
+     * 소비자 입장에서 판매 입니다.
+     * 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.
+     */
+    @DeleteMapping("/sell/{orderNumber}")
+    public String cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        orderService.cancelOrderSell(orderNumber);
 
         return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
     }
