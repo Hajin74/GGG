@@ -36,6 +36,18 @@ public class OrderController {
     }
 
     /*
+     * 판매 주문 생성 - Create
+     * 소비자 입장에서 판매 입니다.
+     * 매입용 상품만 구매 가능합니다.
+     */
+    @PostMapping("/sell")
+    public OrderCreateResponse createOrderSell(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
+        UserResponse user = validateUser(accessToken);
+
+        return orderService.createOrderSell(user, orderCreateRequest);
+    }
+
+    /*
      * 구매 주문 입금 완료 처리 - Update
      * 소비자 입장에서 구매 입니다.
      * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.

@@ -74,6 +74,51 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderCreateResponse createOrderSell(UserResponse user, OrderCreateRequest request) {
+        // 상품 가져오기
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 매입용 상품만 판매 주문할 수 있게 예외 처리
+        if (!product.getProductType().equals(ProductType.PURCHASE)) {
+            throw new CustomException(ErrorCode.PRODUCT_ONLY_FOR_SELL);
+        }
+
+        // 사용자 정보 가져오기, 반송용 주소
+        // todo: user 에 배달정보 컬럼 추가
+        String deliverInfo = "서울시 마포구";
+
+        // 주문 시간
+        LocalDateTime orderDate = LocalDateTime.now();
+
+        // 주문 번호
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), request.customerId());
+
+        // 주문 생성
+        Order newOrder = Order.builder()
+                .orderNumber(orderNumber)
+                .orderProduct(product)
+                .customerId(request.customerId())
+                .orderPrice(product.getUnitPrice())
+                .quantity(request.quantity())
+                .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
+                .orderDate(orderDate)
+                .deliverInfo(deliverInfo)
+                .orderStatus(OrderStatus.ORDERED)
+                .orderType(OrderType.SELL)
+                .build();
+        orderRepository.save(newOrder);
+
+        return new OrderCreateResponse(
+                newOrder.getOrderNumber(),
+                newOrder.getOrderPrice(),
+                newOrder.getQuantity(),
+                newOrder.getTotalPrice(),
+                deliverInfo
+        );
+    }
+
+    @Transactional
     public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
