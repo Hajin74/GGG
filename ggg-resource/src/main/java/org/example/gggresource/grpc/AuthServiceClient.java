@@ -1,10 +1,9 @@
 package org.example.gggresource.grpc;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.StatusRuntimeException;
 import lombok.extern.slf4j.Slf4j;
 import net.devh.boot.grpc.client.inject.GrpcClient;
+import org.example.gggresource.dto.UserResponse;
 import org.springframework.stereotype.Service;
 import org.example.ggg.grpc.AuthServiceGrpc;
 import org.example.ggg.grpc.AuthRequest;
@@ -17,16 +16,17 @@ public class AuthServiceClient {
     @GrpcClient("auth")
     private AuthServiceGrpc.AuthServiceBlockingStub authServiceBlockingStub;
 
-    public String authenticateUser(String accessToken) {
+    public UserResponse authenticateUser(String accessToken) {
         try {
             AuthResponse response = authServiceBlockingStub.authenticateUser(
                     AuthRequest.newBuilder()
                             .setAccessToken(accessToken)
                             .build());
 
-            return response.toString();
+            return new UserResponse(response.getSuccess(), response.getId(), response.getUsername());
         } catch (StatusRuntimeException exception) {
-            return "[FAIL] " + exception.getStatus().getCode().name();
+            log.info("gRPC 호출 실패 : {}", exception.getStatus().getCode().name());
+            return new UserResponse(false, -1, "Unknown");
         }
     }
 
