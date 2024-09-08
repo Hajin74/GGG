@@ -176,6 +176,25 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderStatusUpdateResponse completeReceipt(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 송금 완료 상태인지 확인
+        if (!order.getOrderStatus().equals(OrderStatus.TRANSFERRED)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // 수령 완료
+        order.completeReceipt();
+
+        return new OrderStatusUpdateResponse(
+                order.getOrderNumber(),
+                order.getOrderStatus()
+        );
+    }
+
+    @Transactional
     public void cancelOrderBuy(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));

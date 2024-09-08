@@ -84,6 +84,10 @@ public class Order {
         this.orderStatus = OrderStatus.DELIVERED;
     }
 
+    public void completeReceipt() {
+        this.orderStatus = OrderStatus.RECEIVED;
+    }
+
     public void cancelOrder() {
         this.isDeleted = true;
     }
