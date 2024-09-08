@@ -48,6 +48,18 @@ public class OrderController {
     }
 
     /*
+     * 판매 주문 송금 완료 처리 - Update
+     * 소비자 입장에서 판매 입니다.
+     * 주문 완료된 상태만 송금 완료 처리할 수 있습니다.
+     */
+    @PatchMapping("/{orderNumber}/completeTransfer")
+    public OrderStatusUpdateResponse completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        validateUser(accessToken);
+
+        return orderService.completeTransfer(orderNumber);
+    }
+
+    /*
      * 구매 주문 입금 완료 처리 - Update
      * 소비자 입장에서 구매 입니다.
      * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.
