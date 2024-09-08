@@ -23,44 +23,49 @@ public class OrderController {
     private final OrderService orderService;
     private final AuthServiceClient authServiceClient;
 
-    /* 구매 주문 생성 - Create
+    /*
+     * 구매 주문 생성 - Create
      * 소비자 입장에서 구매 입니다.
      * 판매용 상품만 구매 가능합니다.
-     * todo: 주문 정보와 구매 타입에 맞는 주문이 생성됩니다.
      */
     @PostMapping("/buy")
     public OrderCreateResponse createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
-        // 인증 서버에 토큰을 보내어 사용자 검증을 하고 사용자 정보를 응답값으로 받음
-        UserResponse user = authServiceClient.authenticateUser(accessToken);
-
-        if (!user.success()) {
-            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
-        }
+        UserResponse user = validateUser(accessToken);
 
         return orderService.createOrderBuy(user, orderCreateRequest);
     }
 
-
+    /*
+     * 구매 주문 입금 완료 처리 - Update
+     * 소비자 입장에서 구매 입니다.
+     * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.
+     */
     @PatchMapping("/{orderNumber}/completeDeposit")
     public OrderStatusUpdateResponse completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        UserResponse user = authServiceClient.authenticateUser(accessToken);
-
-        if (!user.success()) {
-            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
-        }
+        validateUser(accessToken);
 
         return orderService.completeDeposit(orderNumber);
     }
 
+    /*
+     * 구매 주문 발송 완료 처리 - Update
+     * 소비자 입장에서 구매 입니다.
+     * 입금 완료된 상태만 발송 완료 처리할 수 있습니다.
+     */
     @PatchMapping("/{orderNumber}/completeDelivery")
     public OrderStatusUpdateResponse completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        UserResponse user = authServiceClient.authenticateUser(accessToken);
-
-        if (!user.success()) {
-            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
-        }
+        validateUser(accessToken);
 
         return orderService.completeDelivery(orderNumber);
     }
+
+    private UserResponse validateUser(String accessToken) {
+        UserResponse user = authServiceClient.authenticateUser(accessToken);
+        if (!user.success()) {
+            throw new CustomException(ErrorCode.AUTHORIZATION_FAILED);
+        }
+        return user;
+    }
+
 
 }
