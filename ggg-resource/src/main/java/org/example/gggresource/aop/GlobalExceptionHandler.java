@@ -1,7 +1,7 @@
 package org.example.gggresource.aop;
 
-import org.example.gggauthorization.exception.CustomException;
-import org.example.gggauthorization.exception.ErrorCode;
+import org.example.gggresource.exception.CustomException;
+import org.example.gggresource.exception.ErrorCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
