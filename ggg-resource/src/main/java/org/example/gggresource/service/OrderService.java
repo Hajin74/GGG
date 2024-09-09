@@ -11,10 +11,13 @@ import org.example.gggresource.exception.CustomException;
 import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.repository.OrderRepository;
 import org.example.gggresource.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -124,9 +127,10 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<InvoiceResponse> getOrderInvoices(UserResponse user) {
-        List<Order> orders = orderRepository.findAllByCustomerId(user.id());
-        return orders.stream()
+    public List<InvoiceResponse> getOrderInvoices(UserResponse user, LocalDate date, OrderType invoiceType, PageRequest pageRequest) {
+        Page<Order> orders = orderRepository.searchOrders(user.id(), date, invoiceType, pageRequest);
+
+        List<InvoiceResponse> invoiceResponses = orders.getContent().stream()
                 .map(order -> new InvoiceResponse(
                         order.getOrderNumber(),
                         order.getOrderPrice(),
@@ -134,6 +138,8 @@ public class OrderService {
                         order.getTotalPrice(),
                         order.getDeliverInfo()
                 )).toList();
+
+        return invoiceResponses;
     }
 
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {

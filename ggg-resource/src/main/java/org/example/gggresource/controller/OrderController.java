@@ -3,13 +3,16 @@ package org.example.gggresource.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.dto.*;
+import org.example.gggresource.enums.OrderType;
 import org.example.gggresource.exception.CustomException;
 import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Slf4j
@@ -73,14 +76,20 @@ public class OrderController {
 
     /*
      * 주문 목록 조회 - Read
-     * 사용자 권한에 맞는 invoice 를 출력합니다.
-     * 즉, 본인의 주문 건만 조회할 수 있습니다.
+     * 사용자 권한에 맞는 invoice 를 출력합니다. 즉, 본인의 주문 건만 조회할 수 있습니다.
+     * 날짜(date), 개수(limit), 데이터 위치(offset), 주문 유형(invoiceType) 을 입력받습니다.
+     *
      */
     @GetMapping
-    public List<InvoiceResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken) {
+    public List<InvoiceResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken,
+                                                  @RequestParam(value = "date", required = false) LocalDate date,
+                                                  @RequestParam(value = "limit", defaultValue = "5") int limit,
+                                                  @RequestParam(value = "offset", defaultValue = "0") int offset,
+                                                  @RequestParam(value = "invoiceType", required = false) OrderType invoiceType) {
         UserResponse user = validateUser(accessToken);
+        PageRequest pageRequest = PageRequest.of(offset, limit);
 
-        return orderService.getOrderInvoices(user);
+        return orderService.getOrderInvoices(user, date, invoiceType, pageRequest);
     }
 
     private UserResponse validateUser(String accessToken) {
