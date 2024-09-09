@@ -1,18 +1,16 @@
 package org.example.gggresource.controller;
 
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.example.gggresource.dto.OrderCreateRequest;
-import org.example.gggresource.dto.OrderCreateResponse;
-import org.example.gggresource.dto.OrderStatusUpdateResponse;
-import org.example.gggresource.dto.UserResponse;
+import org.example.gggresource.dto.*;
 import org.example.gggresource.exception.CustomException;
 import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -71,6 +69,18 @@ public class OrderController {
         orderService.cancelOrderBuy(orderNumber);
 
         return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+    }
+
+    /*
+     * 주문 목록 조회 - Read
+     * 사용자 권한에 맞는 invoice 를 출력합니다.
+     * 즉, 본인의 주문 건만 조회할 수 있습니다.
+     */
+    @GetMapping
+    public List<InvoiceResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken) {
+        UserResponse user = validateUser(accessToken);
+
+        return orderService.getOrderInvoices(user);
     }
 
     private UserResponse validateUser(String accessToken) {

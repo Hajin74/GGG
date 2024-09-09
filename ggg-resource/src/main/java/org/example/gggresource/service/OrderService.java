@@ -3,10 +3,7 @@ package org.example.gggresource.service;
 import lombok.RequiredArgsConstructor;
 import org.example.gggresource.domain.entity.Order;
 import org.example.gggresource.domain.entity.Product;
-import org.example.gggresource.dto.OrderCreateRequest;
-import org.example.gggresource.dto.OrderCreateResponse;
-import org.example.gggresource.dto.OrderStatusUpdateResponse;
-import org.example.gggresource.dto.UserResponse;
+import org.example.gggresource.dto.*;
 import org.example.gggresource.enums.OrderStatus;
 import org.example.gggresource.enums.OrderType;
 import org.example.gggresource.enums.ProductType;
@@ -20,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -123,6 +121,19 @@ public class OrderService {
 
         // 주문 취소
         order.cancelOrder();
+    }
+
+    @Transactional(readOnly = true)
+    public List<InvoiceResponse> getOrderInvoices(UserResponse user) {
+        List<Order> orders = orderRepository.findAllByCustomerId(user.id());
+        return orders.stream()
+                .map(order -> new InvoiceResponse(
+                        order.getOrderNumber(),
+                        order.getOrderPrice(),
+                        order.getQuantity(),
+                        order.getTotalPrice(),
+                        order.getDeliverInfo()
+                )).toList();
     }
 
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
