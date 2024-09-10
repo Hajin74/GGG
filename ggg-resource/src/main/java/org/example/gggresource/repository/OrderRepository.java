@@ -11,11 +11,12 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
-    Optional<Order> findByOrderNumber(String orderNumber);
+    Optional<Order> findByOrderNumberAndIsDeletedFalse(String orderNumber);
 
     @Query("SELECT o FROM Order o " +
             "WHERE o.customerId = :customerId " +
             "AND (:startOfDay IS NULL OR (o.orderDate BETWEEN :startOfDay AND :endOfDay)) " +
-            "AND (:invoiceType IS NULL OR o.orderType = :invoiceType)")
+            "AND (:invoiceType IS NULL OR o.orderType = :invoiceType) " +
+            "AND (o.isDeleted = false)")
     Page<Order> searchOrders(Long customerId, LocalDateTime startOfDay, LocalDateTime endOfDay, OrderType invoiceType, Pageable pageable);
 }
