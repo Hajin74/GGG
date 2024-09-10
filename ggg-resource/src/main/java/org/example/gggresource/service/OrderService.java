@@ -125,7 +125,7 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 주문 완료 상태인지 확인
@@ -144,7 +144,7 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeTransfer(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 주문 완료 상태인지 확인
@@ -163,7 +163,7 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeDelivery(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 입금 완료 상태인지 확인
@@ -182,7 +182,7 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeReceipt(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 송금 완료 상태인지 확인
@@ -201,7 +201,7 @@ public class OrderService {
 
     @Transactional
     public void cancelOrderBuy(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 발송 완료 상태가 아닌지 확인
@@ -215,7 +215,7 @@ public class OrderService {
 
     @Transactional
     public void cancelOrderSell(String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 수령 완료 상태가 아닌지 확인
@@ -256,7 +256,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public OrderDetailResponse getDetailOrder(UserResponse user, String orderNumber) {
-        Order order = orderRepository.findByOrderNumber(orderNumber)
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         InvoiceResponse invoiceResponse = new InvoiceResponse(
@@ -273,6 +273,18 @@ public class OrderService {
         );
 
         return orderDetailResponse;
+    }
+
+    @Transactional
+    public void deleteOrder(UserResponse user, String orderNumber) {
+        Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        order.softDeleteOrder();
     }
 
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
