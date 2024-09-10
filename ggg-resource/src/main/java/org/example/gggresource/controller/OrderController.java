@@ -97,7 +97,7 @@ public class OrderController {
     }
 
     /*
-     * 구매 주문 취소 - Delete
+     * 구매 주문 취소 - Update
      * 소비자 입장에서 구매 입니다.
      * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
      */
@@ -111,7 +111,7 @@ public class OrderController {
     }
 
     /*
-     * 판매 주문 취소 - Delete
+     * 판매 주문 취소 - Update
      * 소비자 입장에서 판매 입니다.
      * 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.
      */
@@ -151,6 +151,20 @@ public class OrderController {
         UserResponse user = validateUser(accessToken);
         return orderService.getDetailOrder(user, orderNumber);
     }
+
+    /*
+     * 주문 삭제 - Delete
+     * 해당 주문은 DB 에서 데이터가 삭제되지 않고, 비활성화(soft deleted) 처리 됩니다.
+     */
+    @DeleteMapping("/{orderNumber}")
+    public String deleteOrder(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        UserResponse user = validateUser(accessToken);
+
+        orderService.deleteOrder(user, orderNumber);
+
+        return "주문 번호 " + orderNumber + "가 삭제 되었습니다.";
+    }
+
 
     private UserResponse validateUser(String accessToken) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);

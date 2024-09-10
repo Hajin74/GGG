@@ -92,4 +92,8 @@ public class Order {
         this.isDeleted = true;
     }
 
+    public void softDeleteOrder() {
+        this.isDeleted = true;
+    }
+
 }

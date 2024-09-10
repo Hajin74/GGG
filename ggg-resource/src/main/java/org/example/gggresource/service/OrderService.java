@@ -275,6 +275,18 @@ public class OrderService {
         return orderDetailResponse;
     }
 
+    @Transactional
+    public void deleteOrder(UserResponse user, String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
+        order.softDeleteOrder();
+    }
+
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
         BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
         return unitPrice.multiply(quantityAsBigDecimal);
