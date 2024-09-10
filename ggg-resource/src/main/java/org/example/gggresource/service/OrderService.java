@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
@@ -131,7 +132,16 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public PaginationResponse getOrderInvoices(UserResponse user, LocalDate date, OrderType invoiceType, PageRequest pageRequest) {
-        Page<Order> orders = orderRepository.searchOrders(user.id(), date, invoiceType, pageRequest);
+
+        LocalDateTime startOfDay = null;
+        LocalDateTime endOfDay = null;
+
+        if (date != null) {
+            startOfDay = date.atStartOfDay();
+            endOfDay = date.atTime(LocalTime.MAX);
+        }
+
+        Page<Order> orders = orderRepository.searchOrders(user.id(), startOfDay, endOfDay, invoiceType, pageRequest);
 
         List<InvoiceResponse> invoiceResponses = orders.getContent().stream()
                 .map(order -> new InvoiceResponse(

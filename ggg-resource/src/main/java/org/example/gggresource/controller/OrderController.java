@@ -1,5 +1,7 @@
 package org.example.gggresource.controller;
 
+import com.google.protobuf.ByteString;
+import com.google.type.DateTime;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.dto.*;
@@ -10,6 +12,7 @@ import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -83,7 +86,7 @@ public class OrderController {
      */
     @GetMapping
     public PaginationResponse getOrderInvoices(@RequestHeader("accessToken") String accessToken,
-                                                  @RequestParam(value = "date", required = false) LocalDate date,
+                                                  @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                                   @RequestParam(value = "limit", defaultValue = "5") int limit,
                                                   @RequestParam(value = "offset", defaultValue = "0") int offset,
                                                   @RequestParam(value = "invoiceType", required = false) OrderType invoiceType) {
