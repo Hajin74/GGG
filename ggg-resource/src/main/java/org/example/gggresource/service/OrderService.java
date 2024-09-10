@@ -1,12 +1,10 @@
 package org.example.gggresource.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.domain.entity.Order;
 import org.example.gggresource.domain.entity.Product;
-import org.example.gggresource.dto.OrderCreateRequest;
-import org.example.gggresource.dto.OrderCreateResponse;
-import org.example.gggresource.dto.OrderStatusUpdateResponse;
-import org.example.gggresource.dto.UserResponse;
+import org.example.gggresource.dto.*;
 import org.example.gggresource.enums.OrderStatus;
 import org.example.gggresource.enums.OrderType;
 import org.example.gggresource.enums.ProductType;
@@ -14,19 +12,26 @@ import org.example.gggresource.exception.CustomException;
 import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.repository.OrderRepository;
 import org.example.gggresource.repository.ProductRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+
 
     @Transactional
     public OrderCreateResponse createOrderBuy(UserResponse user, OrderCreateRequest request) {
@@ -222,6 +227,33 @@ public class OrderService {
         order.cancelOrder();
     }
 
+    @Transactional(readOnly = true)
+    public PaginationResponse getOrderInvoices(UserResponse user, LocalDate date, OrderType invoiceType, PageRequest pageRequest) {
+
+        LocalDateTime startOfDay = null;
+        LocalDateTime endOfDay = null;
+
+        if (date != null) {
+            startOfDay = date.atStartOfDay();
+            endOfDay = date.atTime(LocalTime.MAX);
+        }
+
+        Page<Order> orders = orderRepository.searchOrders(user.id(), startOfDay, endOfDay, invoiceType, pageRequest);
+
+        List<InvoiceResponse> invoiceResponses = orders.getContent().stream()
+                .map(order -> new InvoiceResponse(
+                        order.getOrderNumber(),
+                        order.getOrderPrice(),
+                        order.getQuantity(),
+                        order.getTotalPrice(),
+                        order.getDeliverInfo()
+                )).toList();
+
+        LinkResponse linkResponse = generateLinks(orders, pageRequest, invoiceType, date);
+
+        return new PaginationResponse(invoiceResponses, linkResponse);
+    }
+
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
         BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
         return unitPrice.multiply(quantityAsBigDecimal);
@@ -236,5 +268,39 @@ public class OrderService {
         String formattedCustomerId = String.format("%04d", customerId);
 
         return String.format("ORD-%s-%s-%s-%s", dateTime, orderType, formattedProductId, formattedCustomerId);
+    }
+
+    private LinkResponse generateLinks(Page<Order> orders, PageRequest pageRequest, OrderType invoiceType, LocalDate date) {
+        String baseUrl = "/api/orders";
+
+        int limit = pageRequest.getPageSize();
+        long offset = pageRequest.getOffset();
+        long currentPage = (offset / limit) + 1;
+
+        log.info("limit: {}, offset: {}, currentPage: {}", limit, offset, currentPage);
+
+        String prev = null;
+        if (pageRequest.hasPrevious() && currentPage <= orders.getTotalPages()) {
+            prev = String.format("%s?date=%s&limit=%d&offset=%d&invoiceType=%s",
+                    baseUrl,
+                    date != null ? date.toString() : "",
+                    limit,
+                    Math.max(offset / limit - 1, 0),
+                    invoiceType
+            );
+        }
+
+        String next = null;
+        if (orders.hasNext()) {
+            next = String.format("%s?date=%s&limit=%d&offset=%d&invoiceType=%s",
+                    baseUrl,
+                    date != null ? date.toString() : "",
+                    limit,
+                    offset / limit + 1,
+                    invoiceType
+            );
+        }
+
+        return new LinkResponse(prev, next, currentPage, orders.getTotalPages(), orders.getTotalElements());
     }
 }
