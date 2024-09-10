@@ -8,6 +8,7 @@ import org.example.gggresource.exception.CustomException;
 import org.example.gggresource.exception.ErrorCode;
 import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -81,7 +82,7 @@ public class OrderController {
      *
      */
     @GetMapping
-    public List<InvoiceResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken,
+    public PaginationResponse getOrderInvoices(@RequestHeader("accessToken") String accessToken,
                                                   @RequestParam(value = "date", required = false) LocalDate date,
                                                   @RequestParam(value = "limit", defaultValue = "5") int limit,
                                                   @RequestParam(value = "offset", defaultValue = "0") int offset,

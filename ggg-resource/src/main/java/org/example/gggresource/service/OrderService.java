@@ -1,6 +1,7 @@
 package org.example.gggresource.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.domain.entity.Order;
 import org.example.gggresource.domain.entity.Product;
 import org.example.gggresource.dto.*;
@@ -22,12 +23,14 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
+
 
     @Transactional
     public OrderCreateResponse createOrderBuy(UserResponse user, OrderCreateRequest request) {
@@ -127,7 +130,7 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<InvoiceResponse> getOrderInvoices(UserResponse user, LocalDate date, OrderType invoiceType, PageRequest pageRequest) {
+    public PaginationResponse getOrderInvoices(UserResponse user, LocalDate date, OrderType invoiceType, PageRequest pageRequest) {
         Page<Order> orders = orderRepository.searchOrders(user.id(), date, invoiceType, pageRequest);
 
         List<InvoiceResponse> invoiceResponses = orders.getContent().stream()
@@ -139,7 +142,9 @@ public class OrderService {
                         order.getDeliverInfo()
                 )).toList();
 
-        return invoiceResponses;
+        LinkResponse linkResponse = generateLinks(orders, pageRequest, invoiceType, date);
+
+        return new PaginationResponse(invoiceResponses, linkResponse);
     }
 
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
@@ -156,5 +161,41 @@ public class OrderService {
         String formattedCustomerId = String.format("%04d", customerId);
 
         return String.format("ORD-%s-%s-%s-%s", dateTime, orderType, formattedProductId, formattedCustomerId);
+    }
+
+    private LinkResponse generateLinks(Page<Order> orders, PageRequest pageRequest, OrderType invoiceType, LocalDate date) {
+        String baseUrl = "/api/orders";
+
+        int limit = pageRequest.getPageSize();
+        long offset = pageRequest.getOffset();
+        long currentPage = (offset / limit) + 1;
+
+        log.info("limit: {}, offset: {}, currentPage: {}", limit, offset, currentPage);
+
+        String prev = null;
+        if (pageRequest.hasPrevious() && currentPage <= orders.getTotalPages()) {
+            prev = String.format("%s?date=%s&limit=%d&offset=%d&invoiceType=%s",
+                    baseUrl,
+                    date != null ? date.toString() : "",
+                    limit,
+                    Math.max(offset / limit - 1, 0),
+                    invoiceType
+            );
+            log.info("prev: {}", prev);
+        }
+
+        String next = null;
+        if (orders.hasNext()) {
+            next = String.format("%s?date=%s&limit=%d&offset=%d&invoiceType=%s",
+                    baseUrl,
+                    date != null ? date.toString() : "",
+                    limit,
+                    offset / limit + 1,
+                    invoiceType
+            );
+            log.info("next: {}, url: {}", pageRequest.next(), next);
+        }
+
+        return new LinkResponse(prev, next, currentPage, orders.getTotalPages(), orders.getTotalElements());
     }
 }
