@@ -142,6 +142,16 @@ public class OrderController {
         return orderService.getOrderInvoices(user, date, invoiceType, pageRequest);
     }
 
+    /*
+     * 주문 상세 조회 - Read
+     * 주문번호, 주문일자, 주문자, 상태, 상품타입(품목), 수량, 금액, 배송지 정보를 응답합니다.
+     */
+    @GetMapping("/{orderNumber}")
+    public OrderDetailResponse getDetailOrder (@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+        UserResponse user = validateUser(accessToken);
+        return orderService.getDetailOrder(user, orderNumber);
+    }
+
     private UserResponse validateUser(String accessToken) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
         if (!user.success()) {

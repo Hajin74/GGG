@@ -254,6 +254,27 @@ public class OrderService {
         return new PaginationResponse(invoiceResponses, linkResponse);
     }
 
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getDetailOrder(UserResponse user, String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        InvoiceResponse invoiceResponse = new InvoiceResponse(
+                order.getOrderNumber(),
+                order.getOrderPrice(),
+                order.getQuantity(),
+                order.getTotalPrice(),
+                order.getDeliverInfo());
+
+        OrderDetailResponse orderDetailResponse = new OrderDetailResponse(
+                invoiceResponse,
+                order.getOrderStatus(),
+                order.getOrderDate()
+        );
+
+        return orderDetailResponse;
+    }
+
     private BigDecimal getTotalPrice(int quantity, BigDecimal unitPrice) {
         BigDecimal quantityAsBigDecimal = BigDecimal.valueOf(quantity);
         return unitPrice.multiply(quantityAsBigDecimal);
