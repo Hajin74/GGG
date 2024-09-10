@@ -48,7 +48,7 @@ public class Order {
     private String deliverInfo;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private OrderStatus orderStatus;
 
     @Enumerated(EnumType.STRING)
@@ -74,11 +74,19 @@ public class Order {
     }
 
     public void completeDeposit() {
-        this.orderStatus = OrderStatus.PAID;
+        this.orderStatus = OrderStatus.DEPOSITED;
+    }
+
+    public void completeTransfer() {
+        this.orderStatus = OrderStatus.TRANSFERRED;
     }
 
     public void completeDelivery() {
         this.orderStatus = OrderStatus.DELIVERED;
+    }
+
+    public void completeReceipt() {
+        this.orderStatus = OrderStatus.RECEIVED;
     }
 
     public void cancelOrder() {

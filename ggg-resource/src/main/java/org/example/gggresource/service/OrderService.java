@@ -79,6 +79,51 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderCreateResponse createOrderSell(UserResponse user, OrderCreateRequest request) {
+        // 상품 가져오기
+        Product product = productRepository.findById(request.productId())
+                .orElseThrow(() -> new CustomException(ErrorCode.PRODUCT_NOT_FOUND));
+
+        // 매입용 상품만 판매 주문할 수 있게 예외 처리
+        if (!product.getProductType().equals(ProductType.PURCHASE)) {
+            throw new CustomException(ErrorCode.PRODUCT_ONLY_FOR_SELL);
+        }
+
+        // 사용자 정보 가져오기, 반송용 주소
+        // todo: user 에 배달정보 컬럼 추가
+        String deliverInfo = "서울시 마포구";
+
+        // 주문 시간
+        LocalDateTime orderDate = LocalDateTime.now();
+
+        // 주문 번호
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), request.customerId());
+
+        // 주문 생성
+        Order newOrder = Order.builder()
+                .orderNumber(orderNumber)
+                .orderProduct(product)
+                .customerId(request.customerId())
+                .orderPrice(product.getUnitPrice())
+                .quantity(request.quantity())
+                .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
+                .orderDate(orderDate)
+                .deliverInfo(deliverInfo)
+                .orderStatus(OrderStatus.ORDERED)
+                .orderType(OrderType.SELL)
+                .build();
+        orderRepository.save(newOrder);
+
+        return new OrderCreateResponse(
+                newOrder.getOrderNumber(),
+                newOrder.getOrderPrice(),
+                newOrder.getQuantity(),
+                newOrder.getTotalPrice(),
+                deliverInfo
+        );
+    }
+
+    @Transactional
     public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
@@ -98,17 +143,55 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderStatusUpdateResponse completeTransfer(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 주문 완료 상태인지 확인
+        if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // 입금 완료
+        order.completeTransfer();
+
+        return new OrderStatusUpdateResponse(
+                order.getOrderNumber(),
+                order.getOrderStatus()
+        );
+    }
+
+    @Transactional
     public OrderStatusUpdateResponse completeDelivery(String orderNumber) {
         Order order = orderRepository.findByOrderNumber(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
         // 입금 완료 상태인지 확인
-        if (!order.getOrderStatus().equals(OrderStatus.PAID)) {
+        if (!order.getOrderStatus().equals(OrderStatus.DEPOSITED)) {
             throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
         }
 
         // 발송 완료
         order.completeDelivery();
+
+        return new OrderStatusUpdateResponse(
+                order.getOrderNumber(),
+                order.getOrderStatus()
+        );
+    }
+
+    @Transactional
+    public OrderStatusUpdateResponse completeReceipt(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 송금 완료 상태인지 확인
+        if (!order.getOrderStatus().equals(OrderStatus.TRANSFERRED)) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_STATUS);
+        }
+
+        // 수령 완료
+        order.completeReceipt();
 
         return new OrderStatusUpdateResponse(
                 order.getOrderNumber(),
@@ -124,6 +207,20 @@ public class OrderService {
         // 발송 완료 상태가 아닌지 확인
         if (order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
             throw new CustomException(ErrorCode.ORDER_ALREADY_DELIVERED);
+        }
+
+        // 주문 취소
+        order.cancelOrder();
+    }
+
+    @Transactional
+    public void cancelOrderSell(String orderNumber) {
+        Order order = orderRepository.findByOrderNumber(orderNumber)
+                .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 수령 완료 상태가 아닌지 확인
+        if (order.getOrderStatus().equals(OrderStatus.RECEIVED)) {
+            throw new CustomException(ErrorCode.ORDER_ALREADY_RECEIVED);
         }
 
         // 주문 취소
@@ -191,7 +288,6 @@ public class OrderService {
                     Math.max(offset / limit - 1, 0),
                     invoiceType
             );
-            log.info("prev: {}", prev);
         }
 
         String next = null;
@@ -203,7 +299,6 @@ public class OrderService {
                     offset / limit + 1,
                     invoiceType
             );
-            log.info("next: {}, url: {}", pageRequest.next(), next);
         }
 
         return new LinkResponse(prev, next, currentPage, orders.getTotalPages(), orders.getTotalElements());
