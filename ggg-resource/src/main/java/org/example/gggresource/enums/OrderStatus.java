@@ -9,7 +9,8 @@ public enum OrderStatus {
     DEPOSITED("입금완료"),
     DELIVERED("발송완료"),
     TRANSFERRED("송금완료"),
-    RECEIVED("수령완료");
+    RECEIVED("수령완료"),
+    CANCELED("주문취소");
 
     private final String korean;
 

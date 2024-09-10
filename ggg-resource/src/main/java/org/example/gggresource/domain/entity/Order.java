@@ -89,7 +89,7 @@ public class Order {
     }
 
     public void cancelOrder() {
-        this.isDeleted = true;
+        this.orderStatus = OrderStatus.CANCELED;
     }
 
     public void softDeleteOrder() {
