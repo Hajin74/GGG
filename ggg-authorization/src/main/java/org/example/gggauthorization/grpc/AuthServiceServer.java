@@ -19,7 +19,7 @@ public class AuthServiceServer extends AuthServiceGrpc.AuthServiceImplBase {
 
     @Override
     public void authenticateUser(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
-        log.info("[jwtService] authenticateUser - token : {}", request.getAccessToken());
+        log.info("[jwtService] authenticateUser");
 
         // 토큰 검증 및 사용자 정보 획득
         User user = jwtService.validateAccessToken(request.getAccessToken());

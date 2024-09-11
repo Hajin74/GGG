@@ -97,7 +97,6 @@ public class JwtService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
         String deliverAddress = user.getDeliverAddress();
-        log.info("[JwtService] deliverAddress : {}", deliverAddress);
 
         // 사용자 객체 반환
         return User.builder()
