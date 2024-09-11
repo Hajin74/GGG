@@ -125,6 +125,8 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeDeposit(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -149,6 +151,8 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeTransfer(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -173,6 +177,8 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeDelivery(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -197,6 +203,8 @@ public class OrderService {
 
     @Transactional
     public OrderStatusUpdateResponse completeReceipt(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -221,6 +229,8 @@ public class OrderService {
 
     @Transactional
     public void cancelOrderBuy(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -240,6 +250,8 @@ public class OrderService {
 
     @Transactional
     public void cancelOrderSell(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -372,4 +384,15 @@ public class OrderService {
 
         return new LinkResponse(prev, next, currentPage, orders.getTotalPages(), orders.getTotalElements());
     }
+
+    private void validateOrderType(String orderNumber, OrderType expectedOrderType) {
+        String[] parts = orderNumber.split("-");
+        String orderType = parts[2];
+
+        // 기대한 주문 타입이 맞는지 확인
+        if (!orderType.equals(expectedOrderType.name())) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_TYPE);
+        }
+    }
+
 }
