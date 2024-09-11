@@ -24,3 +24,7 @@ grpc:
     auth:
       address: localhost:50052
       negotiation-type: plaintext
+
+springdoc:
+  swagger-ui:
+    path: /swagger.html
