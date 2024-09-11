@@ -10,6 +10,8 @@ import org.example.gggresource.grpc.AuthServiceClient;
 import org.example.gggresource.service.OrderService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,10 +32,11 @@ public class OrderController {
      * 판매용 상품만 구매 가능합니다.
      */
     @PostMapping("/buy")
-    public OrderCreateResponse createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
+    public ResponseEntity<OrderCreateResponse> createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.createOrderBuy(user, orderCreateRequest);
+        OrderCreateResponse orderCreateResponse = orderService.createOrderBuy(user, orderCreateRequest);
+        return new ResponseEntity<>(orderCreateResponse, HttpStatus.OK);
     }
 
     /*
@@ -42,10 +45,11 @@ public class OrderController {
      * 매입용 상품만 구매 가능합니다.
      */
     @PostMapping("/sell")
-    public OrderCreateResponse createOrderSell(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
+    public ResponseEntity<OrderCreateResponse> createOrderSell(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.createOrderSell(user, orderCreateRequest);
+        OrderCreateResponse orderCreateResponse =  orderService.createOrderSell(user, orderCreateRequest);
+        return new ResponseEntity<>(orderCreateResponse, HttpStatus.OK);
     }
 
     /*
@@ -54,10 +58,11 @@ public class OrderController {
      * 주문 완료된 상태만 송금 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeTransfer")
-    public OrderStatusUpdateResponse completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderStatusUpdateResponse> completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.completeTransfer(user, orderNumber);
+        OrderStatusUpdateResponse orderStatusUpdateResponse =  orderService.completeTransfer(user, orderNumber);
+        return new ResponseEntity<>(orderStatusUpdateResponse, HttpStatus.OK);
     }
 
     /*
@@ -66,10 +71,11 @@ public class OrderController {
      * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeDeposit")
-    public OrderStatusUpdateResponse completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderStatusUpdateResponse> completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.completeDeposit(user, orderNumber);
+        OrderStatusUpdateResponse orderStatusUpdateResponse =  orderService.completeDeposit(user, orderNumber);
+        return new ResponseEntity<>(orderStatusUpdateResponse, HttpStatus.OK);
     }
 
     /*
@@ -78,10 +84,11 @@ public class OrderController {
      * 입금 완료된 상태만 발송 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeDelivery")
-    public OrderStatusUpdateResponse completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderStatusUpdateResponse> completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.completeDelivery(user, orderNumber);
+        OrderStatusUpdateResponse orderStatusUpdateResponse = orderService.completeDelivery(user, orderNumber);
+        return new ResponseEntity<>(orderStatusUpdateResponse, HttpStatus.OK);
     }
 
     /*
@@ -90,10 +97,11 @@ public class OrderController {
      * 송금 완료된 상태만 수령 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeReceipt")
-    public OrderStatusUpdateResponse completeReceipt(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderStatusUpdateResponse> completeReceipt(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
-        return orderService.completeReceipt(user, orderNumber);
+        OrderStatusUpdateResponse orderStatusUpdateResponse =  orderService.completeReceipt(user, orderNumber);
+        return new ResponseEntity<>(orderStatusUpdateResponse, HttpStatus.OK);
     }
 
     /*
@@ -102,12 +110,13 @@ public class OrderController {
      * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
      */
     @PatchMapping("/buy/{orderNumber}")
-    public String cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<String> cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
         orderService.cancelOrderBuy(user, orderNumber);
 
-        return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+        String message =  "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /*
@@ -116,12 +125,13 @@ public class OrderController {
      * 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.
      */
     @PatchMapping("/sell/{orderNumber}")
-    public String cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<String> cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
         orderService.cancelOrderSell(user, orderNumber);
 
-        return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+        String message =  "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     /*
@@ -131,7 +141,7 @@ public class OrderController {
      * 인보이스와 페이지네이션(이전 페이지(prev link), 현재 페이지(currentPage), 다음 페이지(next link), 총 페이지 수(totalPage), 총 아이템 수(totalItems)) 정보를 응답합니다.
      */
     @GetMapping
-    public PaginationResponse getOrderInvoices(@RequestHeader("accessToken") String accessToken,
+    public ResponseEntity<PaginationResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken,
                                                @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                                @RequestParam(value = "limit", defaultValue = "5") int limit,
                                                @RequestParam(value = "offset", defaultValue = "0") int offset,
@@ -139,7 +149,8 @@ public class OrderController {
         UserResponse user = validateUser(accessToken);
         PageRequest pageRequest = PageRequest.of(offset, limit);
 
-        return orderService.getOrderInvoices(user, date, invoiceType, pageRequest);
+        PaginationResponse paginationResponse =  orderService.getOrderInvoices(user, date, invoiceType, pageRequest);
+        return new ResponseEntity<>(paginationResponse, HttpStatus.OK);
     }
 
     /*
@@ -147,9 +158,10 @@ public class OrderController {
      * 주문번호, 주문일자, 주문자, 상태, 상품타입(품목), 수량, 금액, 배송지 정보를 응답합니다.
      */
     @GetMapping("/{orderNumber}")
-    public OrderDetailResponse getDetailOrder (@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<OrderDetailResponse> getDetailOrder (@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
-        return orderService.getDetailOrder(user, orderNumber);
+        OrderDetailResponse orderDetailResponse = orderService.getDetailOrder(user, orderNumber);
+        return new ResponseEntity<>(orderDetailResponse, HttpStatus.OK);
     }
 
     /*
@@ -157,12 +169,13 @@ public class OrderController {
      * 해당 주문은 DB 에서 데이터가 삭제되지 않고, 비활성화(soft deleted) 처리 됩니다.
      */
     @DeleteMapping("/{orderNumber}")
-    public String deleteOrder(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
+    public ResponseEntity<String> deleteOrder(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
         orderService.deleteOrder(user, orderNumber);
 
-        return "주문 번호 " + orderNumber + "가 삭제 되었습니다.";
+        String message =  "주문 번호 " + orderNumber + "가 삭제 되었습니다.";
+        return new ResponseEntity<>(message, HttpStatus.OK);
     }
 
     private UserResponse validateUser(String accessToken) {
