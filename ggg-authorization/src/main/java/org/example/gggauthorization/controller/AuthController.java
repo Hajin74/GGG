@@ -30,6 +30,10 @@ public class AuthController {
     private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
     private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
 
+    /*
+     * Access Token 재발급 - Update
+     * Refresh Token 을 가지고 Access Token 을 재발급 한다.
+     */
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         // Cookie 에서 Refresh 토큰 추출

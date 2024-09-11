@@ -2,9 +2,11 @@ package org.example.gggauthorization.auth;
 
 
 import io.jsonwebtoken.Jwts;
+import lombok.extern.slf4j.Slf4j;
 import org.example.gggauthorization.domain.entity.User;
 import org.example.gggauthorization.exception.CustomException;
 import org.example.gggauthorization.exception.ErrorCode;
+import org.example.gggauthorization.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -13,13 +15,16 @@ import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
+@Slf4j
 @Component
 public class JwtService {
 
     private SecretKey secretKey;
+    private UserRepository userRepository;
 
-    public JwtService(@Value("${spring.jwt.secret}") String secret) {
-        secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+    public JwtService(@Value("${spring.jwt.secret}") String secret, UserRepository userRepository) {
+        this.secretKey = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), Jwts.SIG.HS256.key().build().getAlgorithm());
+        this.userRepository = userRepository;
     }
 
     public String getTokenType(String token) {
@@ -88,10 +93,16 @@ public class JwtService {
         String username = getUsername(accessToken);
         Long id = getId(accessToken);
 
+        // DB 에서 사용자 배송지 정보 가져오기
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new CustomException(ErrorCode.USER_NOT_FOUND));
+        String deliverAddress = user.getDeliverAddress();
+
         // 사용자 객체 반환
         return User.builder()
                 .id(id)
                 .username(username)
+                .deliverAddress(deliverAddress)
                 .build();
     }
 

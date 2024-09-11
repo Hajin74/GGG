@@ -23,10 +23,10 @@ public class AuthServiceClient {
                             .setAccessToken(accessToken)
                             .build());
 
-            return new UserResponse(response.getSuccess(), response.getId(), response.getUsername());
+            return new UserResponse(response.getSuccess(), response.getId(), response.getUsername(), response.getDeliverAddress());
         } catch (StatusRuntimeException exception) {
             log.info("gRPC 호출 실패 : {}", exception.getStatus().getCode().name());
-            return new UserResponse(false, -1, "Unknown");
+            return new UserResponse(false, -1, "Unknown", "지정된 배송지 없음");
         }
     }
 

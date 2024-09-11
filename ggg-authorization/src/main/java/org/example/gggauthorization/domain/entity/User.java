@@ -20,11 +20,14 @@ public class User {
 
     private String password;
 
+    private String deliverAddress;
+
     @Builder
-    public User(Long id, String username, String password) {
+    public User(Long id, String username, String password, String deliverAddress) {
         this.id = id;
         this.username = username;
         this.password = password;
+        this.deliverAddress = deliverAddress;
     }
 
 }

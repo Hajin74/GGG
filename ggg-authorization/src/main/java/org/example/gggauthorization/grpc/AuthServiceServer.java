@@ -1,6 +1,5 @@
 package org.example.gggauthorization.grpc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,7 @@ public class AuthServiceServer extends AuthServiceGrpc.AuthServiceImplBase {
 
     @Override
     public void authenticateUser(AuthRequest request, StreamObserver<AuthResponse> responseObserver) {
-        log.info("[jwtService] authenticateUser - token : {}", request.getAccessToken());
+        log.info("[jwtService] authenticateUser");
 
         // 토큰 검증 및 사용자 정보 획득
         User user = jwtService.validateAccessToken(request.getAccessToken());
@@ -30,6 +29,7 @@ public class AuthServiceServer extends AuthServiceGrpc.AuthServiceImplBase {
                 .setSuccess(true)
                 .setId(user.getId())
                 .setUsername(user.getUsername())
+                .setDeliverAddress(user.getDeliverAddress())
                 .build();
 
         // 클라이언트로 응답 전송

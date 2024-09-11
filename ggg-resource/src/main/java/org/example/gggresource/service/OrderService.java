@@ -45,20 +45,19 @@ public class OrderService {
         }
 
         // 사용자 정보 가져오기
-        // todo: user 에 배달정보 컬럼 추가
-        String deliverInfo = "서울시 마포구";
+        String deliverInfo = user.deliverAddress();
 
         // 주문 시간
         LocalDateTime orderDate = LocalDateTime.now();
 
         // 주문 번호
-        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.BUY, request.productId(), request.customerId());
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.BUY, request.productId(), user.id());
 
         // 주문 생성
         Order newOrder = Order.builder()
                 .orderNumber(orderNumber)
                 .orderProduct(product)
-                .customerId(request.customerId())
+                .customerId(user.id())
                 .orderPrice(product.getUnitPrice())
                 .quantity(request.quantity())
                 .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
@@ -90,20 +89,19 @@ public class OrderService {
         }
 
         // 사용자 정보 가져오기, 반송용 주소
-        // todo: user 에 배달정보 컬럼 추가
-        String deliverInfo = "서울시 마포구";
+        String deliverInfo = user.deliverAddress();
 
         // 주문 시간
         LocalDateTime orderDate = LocalDateTime.now();
 
         // 주문 번호
-        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), request.customerId());
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), user.id());
 
         // 주문 생성
         Order newOrder = Order.builder()
                 .orderNumber(orderNumber)
                 .orderProduct(product)
-                .customerId(request.customerId())
+                .customerId(user.id())
                 .orderPrice(product.getUnitPrice())
                 .quantity(request.quantity())
                 .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
@@ -124,9 +122,16 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
+    public OrderStatusUpdateResponse completeDeposit(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 주문 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
@@ -143,9 +148,16 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeTransfer(String orderNumber) {
+    public OrderStatusUpdateResponse completeTransfer(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 주문 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
@@ -162,9 +174,16 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeDelivery(String orderNumber) {
+    public OrderStatusUpdateResponse completeDelivery(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 입금 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.DEPOSITED)) {
@@ -181,9 +200,16 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeReceipt(String orderNumber) {
+    public OrderStatusUpdateResponse completeReceipt(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 송금 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.TRANSFERRED)) {
@@ -200,9 +226,16 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrderBuy(String orderNumber) {
+    public void cancelOrderBuy(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.BUY);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 발송 완료 상태가 아닌지 확인
         if (order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
@@ -214,9 +247,16 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrderSell(String orderNumber) {
+    public void cancelOrderSell(UserResponse user, String orderNumber) {
+        validateOrderType(orderNumber, OrderType.SELL);
+
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 수령 완료 상태가 아닌지 확인
         if (order.getOrderStatus().equals(OrderStatus.RECEIVED)) {
@@ -259,6 +299,11 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
         InvoiceResponse invoiceResponse = new InvoiceResponse(
                 order.getOrderNumber(),
                 order.getOrderPrice(),
@@ -280,6 +325,7 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // 본인의 주문건인지 확인
         if (user.id() != order.getCustomerId()) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
@@ -293,14 +339,14 @@ public class OrderService {
     }
 
     private String generateHumanReadableOrderNumber(LocalDateTime orderDate, OrderType orderType, Long productId, Long customerId) {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String dateTime = orderDate.format(dateFormatter);
 
         // 상품 번호와 손님 번호를 4자리로 포맷
         String formattedProductId = String.format("%04d", productId);
         String formattedCustomerId = String.format("%04d", customerId);
 
-        return String.format("ORD-%s-%s-%s-%s", dateTime, orderType, formattedProductId, formattedCustomerId);
+        return String.format("ORD-%s-%s-P%s-U%s", dateTime, orderType, formattedProductId, formattedCustomerId);
     }
 
     private LinkResponse generateLinks(Page<Order> orders, PageRequest pageRequest, OrderType invoiceType, LocalDate date) {
@@ -336,4 +382,15 @@ public class OrderService {
 
         return new LinkResponse(prev, next, currentPage, orders.getTotalPages(), orders.getTotalElements());
     }
+
+    private void validateOrderType(String orderNumber, OrderType expectedOrderType) {
+        String[] parts = orderNumber.split("-");
+        String orderType = parts[2];
+
+        // 기대한 주문 타입이 맞는지 확인
+        if (!orderType.equals(expectedOrderType.name())) {
+            throw new CustomException(ErrorCode.INVALID_ORDER_TYPE);
+        }
+    }
+
 }

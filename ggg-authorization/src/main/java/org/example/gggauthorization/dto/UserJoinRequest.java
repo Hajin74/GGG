@@ -12,7 +12,9 @@ public record UserJoinRequest(
         String username,
         @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
         @Pattern(regexp = "^(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&+=]).{8,20}$", message = "최소 하나의 대문자, 소문자, 숫자, 특수문자(!@#$%^&+=)를 포함, 최소 8자 최대 20자")
-        String password
+        String password,
+        @NotBlank(message = "배송지(반송지)는 필수 입력 값입니다.")
+        String deliverAddress
 ) {
 
 }

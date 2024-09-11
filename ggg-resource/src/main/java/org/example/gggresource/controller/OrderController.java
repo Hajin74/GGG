@@ -55,9 +55,9 @@ public class OrderController {
      */
     @PatchMapping("/{orderNumber}/completeTransfer")
     public OrderStatusUpdateResponse completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        return orderService.completeTransfer(orderNumber);
+        return orderService.completeTransfer(user, orderNumber);
     }
 
     /*
@@ -67,9 +67,9 @@ public class OrderController {
      */
     @PatchMapping("/{orderNumber}/completeDeposit")
     public OrderStatusUpdateResponse completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        return orderService.completeDeposit(orderNumber);
+        return orderService.completeDeposit(user, orderNumber);
     }
 
     /*
@@ -79,9 +79,9 @@ public class OrderController {
      */
     @PatchMapping("/{orderNumber}/completeDelivery")
     public OrderStatusUpdateResponse completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        return orderService.completeDelivery(orderNumber);
+        return orderService.completeDelivery(user, orderNumber);
     }
 
     /*
@@ -91,9 +91,9 @@ public class OrderController {
      */
     @PatchMapping("/{orderNumber}/completeReceipt")
     public OrderStatusUpdateResponse completeReceipt(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        return orderService.completeReceipt(orderNumber);
+        return orderService.completeReceipt(user, orderNumber);
     }
 
     /*
@@ -103,9 +103,9 @@ public class OrderController {
      */
     @PatchMapping("/buy/{orderNumber}")
     public String cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        orderService.cancelOrderBuy(orderNumber);
+        orderService.cancelOrderBuy(user, orderNumber);
 
         return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
     }
@@ -117,9 +117,9 @@ public class OrderController {
      */
     @PatchMapping("/sell/{orderNumber}")
     public String cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
-        validateUser(accessToken);
+        UserResponse user = validateUser(accessToken);
 
-        orderService.cancelOrderSell(orderNumber);
+        orderService.cancelOrderSell(user, orderNumber);
 
         return "주문 번호 " + orderNumber + "가 취소 처리 되었습니다.";
     }
@@ -164,7 +164,6 @@ public class OrderController {
 
         return "주문 번호 " + orderNumber + "가 삭제 되었습니다.";
     }
-
 
     private UserResponse validateUser(String accessToken) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
