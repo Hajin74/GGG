@@ -52,13 +52,13 @@ public class OrderService {
         LocalDateTime orderDate = LocalDateTime.now();
 
         // 주문 번호
-        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.BUY, request.productId(), request.customerId());
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.BUY, request.productId(), user.id());
 
         // 주문 생성
         Order newOrder = Order.builder()
                 .orderNumber(orderNumber)
                 .orderProduct(product)
-                .customerId(request.customerId())
+                .customerId(user.id())
                 .orderPrice(product.getUnitPrice())
                 .quantity(request.quantity())
                 .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
@@ -97,13 +97,13 @@ public class OrderService {
         LocalDateTime orderDate = LocalDateTime.now();
 
         // 주문 번호
-        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), request.customerId());
+        String orderNumber = generateHumanReadableOrderNumber(orderDate, OrderType.SELL, request.productId(), user.id());
 
         // 주문 생성
         Order newOrder = Order.builder()
                 .orderNumber(orderNumber)
                 .orderProduct(product)
-                .customerId(request.customerId())
+                .customerId(user.id())
                 .orderPrice(product.getUnitPrice())
                 .quantity(request.quantity())
                 .totalPrice(getTotalPrice(request.quantity(), product.getUnitPrice()))
@@ -300,7 +300,7 @@ public class OrderService {
         String formattedProductId = String.format("%04d", productId);
         String formattedCustomerId = String.format("%04d", customerId);
 
-        return String.format("ORD-%s-%s-%s-%s", dateTime, orderType, formattedProductId, formattedCustomerId);
+        return String.format("ORD-%s-%s-P%s-U%s", dateTime, orderType, formattedProductId, formattedCustomerId);
     }
 
     private LinkResponse generateLinks(Page<Order> orders, PageRequest pageRequest, OrderType invoiceType, LocalDate date) {
