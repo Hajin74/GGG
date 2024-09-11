@@ -1,5 +1,6 @@
 package org.example.gggresource.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.dto.*;
@@ -32,6 +33,7 @@ public class OrderController {
      * 판매용 상품만 구매 가능합니다.
      */
     @PostMapping("/buy")
+    @Operation(summary = "구매 주문 생성", description = "소비자 입장에서 구매 입니다. 판매용 상품만 구매 가능합니다.")
     public ResponseEntity<OrderCreateResponse> createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
         UserResponse user = validateUser(accessToken);
 
