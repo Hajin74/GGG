@@ -1,6 +1,8 @@
 package org.example.gggauthorization.controller;
 
 import io.jsonwebtoken.ExpiredJwtException;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +37,8 @@ public class AuthController {
      * Refresh Token 을 가지고 Access Token 을 재발급 한다.
      */
     @PostMapping("/reissue")
+    @Tag(name = "인증 관련 API")
+    @Operation(summary = "Access Token 재발급", description = "Refresh Token 을 가지고 Access Token 을 재발급 한다.")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {
         // Cookie 에서 Refresh 토큰 추출
         String refreshToken = null;

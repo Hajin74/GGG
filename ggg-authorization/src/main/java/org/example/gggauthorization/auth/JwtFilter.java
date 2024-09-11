@@ -29,7 +29,11 @@ public class JwtFilter extends OncePerRequestFilter {
         log.info("[JwtFilter] 요청 URL: " + request.getRequestURI());
 
         // 특정 경로에 대해 필터 적용을 제외
-        if (request.getRequestURI().startsWith("/api/users/join") || request.getRequestURI().startsWith("/api/users/login") || request.getRequestURI().startsWith("/api/auth/reissue")) {
+        if (request.getRequestURI().startsWith("/api/users/join")
+                || request.getRequestURI().startsWith("/api/users/login")
+                || request.getRequestURI().startsWith("/api/auth/reissue")
+                || request.getRequestURI().startsWith("/swagger-ui")
+                || request.getRequestURI().startsWith("/v3/api-docs")) {
             filterChain.doFilter(request, response);
             return;
         }

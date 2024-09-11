@@ -24,3 +24,7 @@ grpc:
     port: 50052
     security:
       enabled: false
+
+springdoc:
+  swagger-ui:
+    path: /swagger.html

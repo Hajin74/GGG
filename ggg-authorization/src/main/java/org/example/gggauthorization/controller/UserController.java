@@ -1,5 +1,7 @@
 package org.example.gggauthorization.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,6 +13,7 @@ import org.example.gggauthorization.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -25,7 +28,9 @@ public class UserController {
      * 사용자 이름과 비밀번호를 요청값으로 받습니다.
      */
     @PostMapping("/join")
-    public ResponseEntity<String> joinUser(@RequestBody @Valid UserJoinRequest request) {
+    @Tag(name = "사용자 관련 API")
+    @Operation(summary = "회원가입")
+    public ResponseEntity<String> joinUser(@RequestBody @Validated UserJoinRequest request) {
         userService.joinUser(request);
         return new ResponseEntity<>(request.username() + "님, 가입을 환영합니다.", HttpStatus.OK);
     }
@@ -35,6 +40,8 @@ public class UserController {
      * 발급했던 RefreshToken 과 사용자 정보를 삭제합니다.
      */
     @DeleteMapping
+    @Tag(name = "사용자 관련 API")
+    @Operation(summary = "회원탈퇴", description = "발급했던 RefreshToken 과 사용자 정보를 삭제합니다.")
     public ResponseEntity<String> signOut(@RequestHeader("accessToken") String accessToken) {
         userService.signOut(accessToken);
         return new ResponseEntity<>("회원탈퇴 되었습니다.", HttpStatus.OK);

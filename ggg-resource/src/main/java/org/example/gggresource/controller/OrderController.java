@@ -1,6 +1,7 @@
 package org.example.gggresource.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.gggresource.dto.*;
@@ -33,6 +34,7 @@ public class OrderController {
      * 판매용 상품만 구매 가능합니다.
      */
     @PostMapping("/buy")
+    @Tag(name = "주문 관련 API")
     @Operation(summary = "구매 주문 생성", description = "소비자 입장에서 구매 입니다. 판매용 상품만 구매 가능합니다.")
     public ResponseEntity<OrderCreateResponse> createOrderBuy(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
         UserResponse user = validateUser(accessToken);
@@ -47,6 +49,8 @@ public class OrderController {
      * 매입용 상품만 구매 가능합니다.
      */
     @PostMapping("/sell")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "판매 주문 생성", description = "소비자 입장에서 판매 입니다. 매입용 상품만 판매 가능합니다.")
     public ResponseEntity<OrderCreateResponse> createOrderSell(@RequestHeader("accessToken") String accessToken, @RequestBody @Validated OrderCreateRequest orderCreateRequest) {
         UserResponse user = validateUser(accessToken);
 
@@ -60,6 +64,8 @@ public class OrderController {
      * 주문 완료된 상태만 송금 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeTransfer")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "판매 주문 송금 완료 처리", description = "소비자 입장에서 판매 입니다. 주문 완료된 상태만 송금 완료 처리할 수 있습니다.")
     public ResponseEntity<OrderStatusUpdateResponse> completeTransfer(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -73,6 +79,8 @@ public class OrderController {
      * 주문 완료된 상태만 입금 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeDeposit")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "구매 주문 입금 완료 처리", description = "소비자 입장에서 구매 입니다. 주문 완료된 상태만 입금 완료 처리할 수 있습니다.")
     public ResponseEntity<OrderStatusUpdateResponse> completeDeposit(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -86,6 +94,8 @@ public class OrderController {
      * 입금 완료된 상태만 발송 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeDelivery")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "구매 주문 발송 완료 처리", description = "소비자 입장에서 구매 입니다. 입금 완료된 상태만 발송 완료 처리할 수 있습니다.")
     public ResponseEntity<OrderStatusUpdateResponse> completeDelivery(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -99,6 +109,8 @@ public class OrderController {
      * 송금 완료된 상태만 수령 완료 처리할 수 있습니다.
      */
     @PatchMapping("/{orderNumber}/completeReceipt")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "판매 주문 수령 완료 처리", description = "소비자 입장에서 판매 입니다. 송금 완료된 상태만 수령 완료 처리할 수 있습니다.")
     public ResponseEntity<OrderStatusUpdateResponse> completeReceipt(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -112,6 +124,8 @@ public class OrderController {
      * 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.
      */
     @PatchMapping("/buy/{orderNumber}")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "구매 주문 취소", description = "소비자 입장에서 구매 입니다. 발송 완료 이전 주문만 구매 주문을 취소할 수 있습니다.")
     public ResponseEntity<String> cancelOrderBuy(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -127,6 +141,8 @@ public class OrderController {
      * 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.
      */
     @PatchMapping("/sell/{orderNumber}")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "판매 주문 취소", description = "소비자 입장에서 판매 입니다. 수령 완료 이전 주문만 판매 주문을 취소할 수 있습니다.")
     public ResponseEntity<String> cancelOrderSell(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
@@ -143,6 +159,8 @@ public class OrderController {
      * 인보이스와 페이지네이션(이전 페이지(prev link), 현재 페이지(currentPage), 다음 페이지(next link), 총 페이지 수(totalPage), 총 아이템 수(totalItems)) 정보를 응답합니다.
      */
     @GetMapping
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "주문 목록 조회", description = "사용자 권한에 맞는 invoice 를 출력합니다. 즉, 본인의 주문 건만 조회할 수 있습니다.")
     public ResponseEntity<PaginationResponse> getOrderInvoices(@RequestHeader("accessToken") String accessToken,
                                                @RequestParam(value = "date", required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
                                                @RequestParam(value = "limit", defaultValue = "5") int limit,
@@ -160,6 +178,8 @@ public class OrderController {
      * 주문번호, 주문일자, 주문자, 상태, 상품타입(품목), 수량, 금액, 배송지 정보를 응답합니다.
      */
     @GetMapping("/{orderNumber}")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "주문 상세 조회", description = "invoice 및 주문 관련 상세 정보를 조회합니다.")
     public ResponseEntity<OrderDetailResponse> getDetailOrder (@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
         OrderDetailResponse orderDetailResponse = orderService.getDetailOrder(user, orderNumber);
@@ -171,6 +191,8 @@ public class OrderController {
      * 해당 주문은 DB 에서 데이터가 삭제되지 않고, 비활성화(soft deleted) 처리 됩니다.
      */
     @DeleteMapping("/{orderNumber}")
+    @Tag(name = "주문 관련 API")
+    @Operation(summary = "주문 삭제", description = "해당 주문은 DB 에서 데이터가 삭제되지 않고, 비활성화(soft deleted) 처리 됩니다.")
     public ResponseEntity<String> deleteOrder(@RequestHeader("accessToken") String accessToken, @PathVariable String orderNumber) {
         UserResponse user = validateUser(accessToken);
 
