@@ -32,7 +32,7 @@ public class UserController {
      * 발급했던 RefreshToken 과 사용자 정보를 삭제합니다.
      */
     @DeleteMapping
-    public void signOut(@RequestHeader("accessToken") String accessToken, HttpServletRequest request) {
+    public void signOut(@RequestHeader("accessToken") String accessToken) {
         userService.signOut(accessToken);
     }
 

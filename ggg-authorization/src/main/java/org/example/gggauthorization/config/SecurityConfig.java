@@ -60,8 +60,7 @@ public class SecurityConfig {
         /* 경로별 인가 작업 */
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/api/users/join", "/api/users/login").permitAll()
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/users/join", "/api/users/login", "/api/auth/reissue").permitAll()
                         .anyRequest().authenticated());
 
         /* 필터 등록 */
