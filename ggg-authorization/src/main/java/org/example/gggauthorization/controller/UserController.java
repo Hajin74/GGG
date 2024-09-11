@@ -1,6 +1,8 @@
 package org.example.gggauthorization.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,6 +32,11 @@ public class UserController {
     @PostMapping("/join")
     @Tag(name = "사용자 관련 API")
     @Operation(summary = "회원가입")
+    @ApiResponses(
+            value = {
+                    @ApiResponse(responseCode = "200", description = "회원가입 성공"),
+                    @ApiResponse(responseCode = "400", description = "요청 형식이 잘못되었습니다.")
+            })
     public ResponseEntity<String> joinUser(@RequestBody @Validated UserJoinRequest request) {
         userService.joinUser(request);
         return new ResponseEntity<>(request.username() + "님, 가입을 환영합니다.", HttpStatus.OK);

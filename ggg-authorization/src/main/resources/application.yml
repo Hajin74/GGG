@@ -28,3 +28,4 @@ grpc:
 springdoc:
   swagger-ui:
     path: /swagger.html
+  show-login-endpoint: true
