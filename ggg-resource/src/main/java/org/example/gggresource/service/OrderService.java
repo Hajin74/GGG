@@ -45,8 +45,7 @@ public class OrderService {
         }
 
         // 사용자 정보 가져오기
-        // todo: user 에 배달정보 컬럼 추가
-        String deliverInfo = "서울시 마포구";
+        String deliverInfo = user.deliverAddress();
 
         // 주문 시간
         LocalDateTime orderDate = LocalDateTime.now();
@@ -90,8 +89,7 @@ public class OrderService {
         }
 
         // 사용자 정보 가져오기, 반송용 주소
-        // todo: user 에 배달정보 컬럼 추가
-        String deliverInfo = "서울시 마포구";
+        String deliverInfo = user.deliverAddress();
 
         // 주문 시간
         LocalDateTime orderDate = LocalDateTime.now();

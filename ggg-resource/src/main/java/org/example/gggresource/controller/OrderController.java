@@ -165,7 +165,6 @@ public class OrderController {
         return "주문 번호 " + orderNumber + "가 삭제 되었습니다.";
     }
 
-
     private UserResponse validateUser(String accessToken) {
         UserResponse user = authServiceClient.authenticateUser(accessToken);
         if (!user.success()) {

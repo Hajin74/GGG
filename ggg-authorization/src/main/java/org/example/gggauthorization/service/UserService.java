@@ -25,6 +25,7 @@ public class UserService {
     public void joinUser(UserJoinRequest request) {
         String username = request.username();
         String password = request.password();
+        String deliverAddress = request.deliverAddress();
 
         boolean isExistedUser = userRepository.existsByUsername(username);
         if (isExistedUser) {
@@ -34,6 +35,7 @@ public class UserService {
         User newUser = User.builder()
                 .username(username)
                 .password(bCryptPasswordEncoder.encode(password))
+                .deliverAddress(deliverAddress)
                 .build();
         userRepository.save(newUser);
     }

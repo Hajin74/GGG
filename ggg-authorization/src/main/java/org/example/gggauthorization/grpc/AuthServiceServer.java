@@ -1,6 +1,5 @@
 package org.example.gggauthorization.grpc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.grpc.stub.StreamObserver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +29,7 @@ public class AuthServiceServer extends AuthServiceGrpc.AuthServiceImplBase {
                 .setSuccess(true)
                 .setId(user.getId())
                 .setUsername(user.getUsername())
+                .setDeliverAddress(user.getDeliverAddress())
                 .build();
 
         // 클라이언트로 응답 전송
