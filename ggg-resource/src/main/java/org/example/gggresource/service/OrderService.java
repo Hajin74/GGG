@@ -124,9 +124,14 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeDeposit(String orderNumber) {
+    public OrderStatusUpdateResponse completeDeposit(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 주문 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
@@ -143,9 +148,14 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeTransfer(String orderNumber) {
+    public OrderStatusUpdateResponse completeTransfer(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 주문 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.ORDERED)) {
@@ -162,9 +172,14 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeDelivery(String orderNumber) {
+    public OrderStatusUpdateResponse completeDelivery(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 입금 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.DEPOSITED)) {
@@ -181,9 +196,14 @@ public class OrderService {
     }
 
     @Transactional
-    public OrderStatusUpdateResponse completeReceipt(String orderNumber) {
+    public OrderStatusUpdateResponse completeReceipt(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 송금 완료 상태인지 확인
         if (!order.getOrderStatus().equals(OrderStatus.TRANSFERRED)) {
@@ -200,9 +220,14 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrderBuy(String orderNumber) {
+    public void cancelOrderBuy(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 발송 완료 상태가 아닌지 확인
         if (order.getOrderStatus().equals(OrderStatus.DELIVERED)) {
@@ -214,9 +239,14 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrderSell(String orderNumber) {
+    public void cancelOrderSell(UserResponse user, String orderNumber) {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
+
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
 
         // 수령 완료 상태가 아닌지 확인
         if (order.getOrderStatus().equals(OrderStatus.RECEIVED)) {
@@ -259,6 +289,11 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // 본인의 주문건인지 확인
+        if (user.id() != order.getCustomerId()) {
+            throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
+        }
+
         InvoiceResponse invoiceResponse = new InvoiceResponse(
                 order.getOrderNumber(),
                 order.getOrderPrice(),
@@ -280,6 +315,7 @@ public class OrderService {
         Order order = orderRepository.findByOrderNumberAndIsDeletedFalse(orderNumber)
                 .orElseThrow(() -> new CustomException(ErrorCode.ORDER_NOT_FOUND));
 
+        // 본인의 주문건인지 확인
         if (user.id() != order.getCustomerId()) {
             throw new CustomException(ErrorCode.UNAUTHORIZED_ACCESS);
         }
@@ -293,7 +329,7 @@ public class OrderService {
     }
 
     private String generateHumanReadableOrderNumber(LocalDateTime orderDate, OrderType orderType, Long productId, Long customerId) {
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String dateTime = orderDate.format(dateFormatter);
 
         // 상품 번호와 손님 번호를 4자리로 포맷
