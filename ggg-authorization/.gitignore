@@ -39,3 +39,4 @@ out/
 ###
 application.properties
 .env
+.DS_Store
