@@ -13,7 +13,6 @@ import org.example.gggauthorization.exception.ErrorCode;
 import org.example.gggauthorization.repository.RefreshTokenRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -30,11 +29,6 @@ public class AuthController {
     private final RefreshTokenRepository refreshTokenRepository;
     private final Long ACCESS_TOKEN_EXPIRED_MS = 600000L;
     private final Long REFRESH_TOKEN_EXPIRED_MS = 86400000L;
-
-    @GetMapping("/test")
-    public String test() {
-        return "ok";
-    }
 
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue(HttpServletRequest request, HttpServletResponse response) {

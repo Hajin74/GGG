@@ -1,20 +1,15 @@
 package org.example.gggauthorization.auth;
 
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import org.example.gggauthorization.domain.entity.User;
 import org.example.gggauthorization.exception.CustomException;
 import org.example.gggauthorization.exception.ErrorCode;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
